@@ -1,0 +1,9 @@
+#Define the goal
+uint32 command #1-zaparkuj; 2-prepare; 3-left; 4-right; 5-grasp; 6-load; 7-wave; 8-dejpac
+uint32 opTimeMs
+---
+#Define the result
+uint32 msElapsed #millisseconds since start
+---
+#Define a feed message
+uint32 status

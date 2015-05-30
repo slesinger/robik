@@ -1,0 +1,63 @@
+SVN 
+user: slesinger@gmail.com
+heslo: zP9pq2PV9QE4
+
+URDF
+====
+MeshLab
+Misfit Model 3D
+
+Check model urdf: cd model; check_urdf ./robot.urdf
+View: urdf_to_graphiz pr2.urdf
+
+
+TF
+==
+rosrun tf tf_echo yaw_link base_link
+rosrun tf view_frames
+
+Building ROS package
+====================
+rosmake
+
+
+Regenerating ros_lib
+====================
+(Refer to http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup)
+cd ~/workspace
+catkin_make install
+cd ~/sketchbook/libraries
+rm -rf ./ros_lib  (pozor mozna se bude muset dotahnout ros.h a ArduinoHardware.h z SVN nebo rosserial_msg, ktere se nevygeneruji. pokud se neco nevygeneruje, je to kvuli schazejicim zavislostem)
+rosrun rosserial_arduino make_libraries.py .   (if problems, delete ~/workspace/src/rosserial/rosserial_arduino/src/roslib/* & catkin_make clean install)
+
+
+Compiling arduino sketch
+========================
+cd ~sketchbook/robot
+make clean
+make
+make upload
+
+
+Speech
+======
+compile nav_commands.txt at http://www.speech.cs.cmu.edu/tools/lmtool-new.html
+
+<<<<<<< .mine
+rename -f 's/3026/nav_commands/' *
+=======
+rename -f 's/3026/nav_commands/' *
+
+
+Action Messages
+===============
+definice je v Cmakelist.txt a pak se pusti catkin_make>>>>>>> .r120
+
+
+Transform map and frequency
+===========================
+rosrun tf view_frames
+
+SSH certificates
+================
+http://www.linuxproblem.org/art_9.html

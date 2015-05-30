@@ -1,0 +1,27 @@
+#!/bin/bash
+
+robot_host="robik"
+source /opt/ros/indigo/setup.bash
+source /home/honza/workspace/devel/setup.bash
+
+
+#------ end of user defined config --------
+
+#set volume to 100%
+amixer set Speaker playback 100% unmute
+#pactl set-sink-volume 0 100%
+echo "Startuji" | festival --tts --language czech
+
+if lsusb | grep --quiet 2341:0010 ; then
+    export CONNECTED="true"
+else
+    export CONNECTED="false"
+fi
+
+export ROS_MASTER_URI=http://$robot_host:11311/
+export ROS_HOSTNAME=$robot_host
+
+cd /home/honza/workspace/src/robik/launch
+roslaunch robik.launch
+
+

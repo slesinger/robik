@@ -1,0 +1,63 @@
+<launch>
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find robik)/maps/obyvak.pgm 0.0250"/>
+
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+        <remap from="scan" to="base_scan/scan" />
+        <param name="base_frame" value="base_link" />
+        <param name="odom_frame" value="odom"/>
+        <param name="map_update_interval" value="5.0"/>
+        <param name="maxUrange" value="5.0"/>
+        <param name="maxrange" value="7.0"/>
+        <param name="sigma" value="0.05"/>
+        <param name="kernelSize" value="1"/>
+        <param name="lstep" value="0.05"/>
+        <param name="astep" value="0.05"/>
+        <param name="iterations" value="5"/>
+        <param name="lsigma" value="0.075"/>
+        <param name="ogain" value="3.0"/>
+        <param name="lskip" value="0"/>
+        <param name="srr" value="0.01"/>
+        <param name="srt" value="0.02"/>
+        <param name="str" value="0.01"/>
+        <param name="stt" value="0.02"/>
+        <param name="linearUpdate" value="0.5"/>
+        <param name="angularUpdate" value="0.436"/>
+        <param name="temporalUpdate" value="-1.0"/>
+        <param name="resampleThreshold" value="0.5"/>
+        <param name="particles" value="80"/>
+        <param name="xmin" value="-10.0" />
+        <param name="ymin" value="-10.0" />
+        <param name="xmax" value="10.0" />
+        <param name="ymax" value="10.0" />
+        <param name="delta" value="0.05"/>
+        <param name="llsamplerange" value="0.01"/>
+        <param name="llsamplestep" value="0.01"/>
+        <param name="lasamplerange" value="0.005"/>
+        <param name="lasamplestep" value="0.005"/>
+        <param name="transform_publish_period" value="0.5"/>
+    </node>
+
+
+	<!-- Throttle the voxel grid that is being published for rviz -->
+    <node ns="move_base_node/local_costmap" name="voxel_grid_throttle" pkg="topic_tools" type="throttle" args="messages voxel_grid 3.0 voxel_grid_throttled" />
+
+    <!-- for moving -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+        <remap from="odom" to="odom" />
+        <remap from="cmd_vel" to="cmd_vel" />
+
+        <!-- Load common configuration files -->
+        <rosparam file="$(find robik)/launch/robik_slam_config/move_base_params.yaml" command="load" />
+        <rosparam file="$(find robik)/launch/robik_slam_config/common_costmap_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find robik)/launch/robik_slam_config/common_costmap_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find robik)/launch/robik_slam_config/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find robik)/launch/robik_slam_config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find robik)/launch/robik_slam_config/base_local_planner_params.yaml" command="load" ns="TrajectoryPlannerROS" />
+    </node>
+
+    <!-- costmap_2d markers -->
+    <node pkg="costmap_2d" type="costmap_2d_markers" name="voxel_visualizer">
+        <remap from="voxel_grid" to="move_base_node/local_costmap/voxel_grid_throttled"/>
+    </node>
+</launch>

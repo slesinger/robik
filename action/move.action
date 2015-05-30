@@ -1,0 +1,12 @@
+#Define the goal
+uint32 command #1-forward; 2-backward; 3-uturn; 4-left; 5-right; 6-zikzak; 7-slowwaltz; 8-catchme; 9-zaparkuj_se; 10-nabij se; 11-shut down; 12-shutdown+poweroff; 13-narozeniny
+uint32 speed
+uint32 time #how much time to move [seconds]
+---
+#Define the result
+uint32 msElapsed #millisseconds since start
+uint32 status
+---
+#Define a feedback message
+uint32 msElapsed #millisseconds since start
+uint32 status

@@ -1,0 +1,28 @@
+footprint: [[ 0.1135,  0.1025],
+            [ 0.1135, -0.1025],
+            [ 0.0370, -0.2360],
+            [-0.2680, -0.2360],
+            [-0.3345, -0.1150],
+            [-0.3345,  0.1150],
+            [-0.2680,  0.2360],
+            [ 0.0390,  0.2360]]
+
+controller_frequency: 2.0
+controller_patience: 5.0
+clearing_radius: 0.3
+footprint_padding: 0.03
+
+
+
+
+recovery_behaviors: [{name: conservative_clear, type: clear_costmap_recovery/ClearCostmapRecovery},
+                     {name: aggressive_clear, type: clear_costmap_recovery/ClearCostmapRecovery}]
+
+NavfnROS:
+  allow_unknown: false
+
+conservative_clear:
+  reset_distance: 3.0
+
+aggressive_clear:
+  reset_distance: 1.84

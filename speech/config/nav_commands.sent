@@ -1,0 +1,14 @@
+<s> FORWARD </s>
+<s> LEFT </s>
+<s> RIGHT </s>
+<s> BACK </s>
+<s> BACKWARD </s>
+<s> STOP </s>
+<s> MOVE FORWARD </s>
+<s> MOVE RIGHT </s>
+<s> MOVE LEFT </s>
+<s> MOVE BACK </s>
+<s> MOVE BACKWARD </s>
+<s> HALT </s>
+<s> HALF SPEED </s>
+<s> FULL SPEED </s>

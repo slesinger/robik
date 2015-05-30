@@ -1,0 +1,20 @@
+body {
+  padding: 0px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+a {
+  color: #00b7ff;
+}
+.clearBoth {
+  clear: both;
+}
+#ruka {
+  background-image: url("/images/ruka.png");
+  width: 342px;
+  height: 230px;
+}
+#movebaseTeleop {
+  background-image: url("/images/keyboardteleopjs-keys.jpg");
+  width: 160px;
+  height: 101px;
+}
