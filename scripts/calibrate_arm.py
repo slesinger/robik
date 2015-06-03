@@ -49,7 +49,7 @@ def test_joint(joint_idx):
     for i in frange(robot.joints[joint_idx].limit.lower, robot.joints[joint_idx].limit.upper, 0.15):
         current_position = i
         set_arm(robot.joints[joint_idx].name, current_position)
-        rospy.sleep(1.0)
+        rospy.sleep(3.0)
 
     set_arm(robot.joints[joint_idx].name, robot.joints[1].limit.upper)
 
