@@ -1,1 +1,1 @@
-/home/honza/sketchbook/robot/robot_config.h
+/home/honza/sketchbook/robik-arduino/robot_config.h

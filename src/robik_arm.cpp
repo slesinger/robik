@@ -5,9 +5,19 @@
 #include "robik_util.h"
 #include "robik/GenericStatus.h"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/video/tracking.hpp>
+
+using namespace cv;
+
 ros::Publisher pub_arm_control;
 
 sensor_msgs::JointState arm_state;
+
+KalmanFilter KF(5, 5, 5);  //dynam, measure, control
+
+
+void kalman_init();  //TODO put proper init state values for all joints
 
 /**
 * init message that is published from driver, contains arm joint state in radians
@@ -27,12 +37,16 @@ void init_joint_state_message(sensor_msgs::JointState *arm_state) {
 * map message from Arduino that is then published by driver, contains arm joint state in radians
 */
 void map_joint_state_message(const robik::GenericStatus *msg, sensor_msgs::JointState *arm_state) {
+
+	Mat prediction = KF.predict((Mat_<float>(5,1) << 0, 0, 0, 0, 0));  //controlMatrix  //TODO put true values here
+	Mat estimated = KF.correct((Mat_<float>(5,1) << msg->arm_yaw, msg->arm_shoulder, msg->arm_elbow, msg->arm_roll, msg->arm_clamp));  //measurementMatrix
+
 	arm_state->header.stamp = ros::Time::now();
-	arm_state->position[0] = map_check_inf(msg->arm_yaw, ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
-	arm_state->position[1] = map_check_inf(msg->arm_shoulder, ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
-	arm_state->position[2] = map_check_inf(msg->arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
-	arm_state->position[3] = map_check_inf(msg->arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
-	arm_state->position[4] = map_check_inf(msg->arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
+	arm_state->position[0] = map_check_inf(prediction.at<float>(0), ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
+	arm_state->position[1] = map_check_inf(prediction.at<float>(1), ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
+	arm_state->position[2] = map_check_inf(prediction.at<float>(2), ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
+	arm_state->position[3] = map_check_inf(prediction.at<float>(3), ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
+	arm_state->position[4] = map_check_inf(prediction.at<float>(4), ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
 }
 
 /**
@@ -142,3 +156,19 @@ estimated_clamp_pos.target_pos = 300;
     // armSetJointState(estimatedClampPos, 0, 0, 0, 0, 80);
   // }
 }
+
+void kalman_init() {
+    // intialization of KF...
+    setIdentity(KF.transitionMatrix);  //model prechodu stavu (pada dolu)
+    setIdentity(KF.controlMatrix);
+
+    KF.statePost = (Mat_<float>(5,1) << ARM_RES_INIT_YAW, ARM_RES_INIT_SHOULDER, ARM_RES_INIT_ELBOW, 
+    										ARM_RES_INIT_ROLL, ARM_RES_INIT_CLAMP);
+    setIdentity(KF.measurementMatrix);
+
+    setIdentity(KF.processNoiseCov, Scalar::all(1));
+    setIdentity(KF.measurementNoiseCov, Scalar::all(9));  //cim mensi, tim presnejsi mereni
+    setIdentity(KF.errorCovPost, Scalar::all(.1));
+
+}
+

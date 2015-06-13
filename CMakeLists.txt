@@ -4,7 +4,7 @@ project(robik)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp tf std_msgs message_generation genmsg actionlib_msgs)
+find_package(catkin REQUIRED COMPONENTS OpenCV roscpp tf std_msgs message_generation genmsg actionlib_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -60,7 +60,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
+#   INCLUDE_DIRS include
 #  LIBRARIES robik
 #  CATKIN_DEPENDS roscpp std_msgs message_runtime
 #  DEPENDS rospy roscpp sound_play
@@ -92,6 +92,7 @@ add_dependencies(robik_driver robik_generate_messages_cpp)
 target_link_libraries(
     robik_driver
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 
 #############
