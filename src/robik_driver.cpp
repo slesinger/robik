@@ -21,6 +21,7 @@
 
 //towards Arduino
 ros::Publisher pub_generic_control;
+ros::Publisher pub_arm_control;
 
 //towards other nodes
 ros::Publisher pub_laser;
@@ -30,6 +31,9 @@ ros::Publisher pub_arm;
 ros::Publisher pub_ai;
 
 sensor_msgs::LaserScan laserscan_msg;
+
+//local function declarations
+void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg);
 
 ////////////////// Services //////////////////
 
@@ -152,7 +156,7 @@ checkClampAndStop();  //TODO
 	pub_odom.publish(robik_odom);
 
 	//arm joint state
-	map_joint_state_message(&msg, &arm_state);
+	arm_set_joint_state(&msg);
 
 	//IMU
 	sensor_msgs::Imu robik_imu;
@@ -199,6 +203,12 @@ void headCallback(const geometry_msgs::Twist& msg) {
 //x	pub_generic_control.publish(gen_msg);
 }
 
+void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg) {
+	arm_controller_set_trajectory(trajectory_msg);
+	const robik::ArmControl *arm_msg;
+	arm_msg = arm_get_arm_control_command();
+	pub_arm_control.publish(*arm_msg);
+}
 
 ////////////////// Main //////////////////
 
@@ -208,7 +218,7 @@ int main(int argc, char **argv) {
 
 	ros::NodeHandle n;
 
-	init_joint_state_message(&arm_state);
+	arm_init();
 
 	//advertise topics to arduino
 	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 100);
@@ -229,15 +239,14 @@ int main(int argc, char **argv) {
 
 	ros::Subscriber sub_cmdvel = n.subscribe("cmd_vel", 10, cmdvelCallback);
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko
-	ros::Subscriber sub_arm = n.subscribe("robik_arm_controller_joint_states", 10, armCallback);
+	ros::Subscriber sub_arm = n.subscribe("robik_arm_controller_joint_states", 10, robik_arm_controller_joint_states_callback);
 
 //ros::spin();
 	ros::Rate loop_rate(20);
 	while (ros::ok()) {
-		arm_state.header.stamp = ros::Time::now();
-		pub_arm.publish(arm_state);
-	    ros::spinOnce();
-	    loop_rate.sleep();
+		pub_arm.publish(*(arm_get_joint_state()));   //publish arm joint state regularly
+		ros::spinOnce();
+		loop_rate.sleep();
 	}
 	return 0;
 }
