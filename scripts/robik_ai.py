@@ -298,7 +298,7 @@ def AI():
 
 def signal_handler(signal, frame):
 	rospy.loginfo('AI shutdown')
-	zaparkuj()
+	zaparkuj_ruku()
 	time.sleep(3)
 	rospy.loginfo('AI shutdown completed or timeout')
 

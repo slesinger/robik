@@ -5,17 +5,16 @@
 	<arg name="robot_connected" value="$(env CONNECTED)" />
 	<arg name="ros_workspace" value="/home/honza/workspace" />
 	<arg name="debug" default="false" />
-	<arg name="db" default="false" />
+	<arg name="moveit" default="true" />
+	<arg name="db" default="true" />
 	<param name="robot_description" command="cat $(find robik)/model/robot.urdf" />
 	<param name="publish_frequency" value="10" />
 
-	<!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
-	<include file="$(find robik_moveit_config)/launch/planning_context.launch">
-		<arg name="load_robot_description" value="true"/>
-	</include>
-
 	<node name="sound_play" pkg="sound_play" type="soundplay_node.py"
 		respawn="true" >
+	</node>
+
+	<node name="robik_driver" pkg="robik" type="robik_driver">
 	</node>
 
 	<group if="$(arg robot_connected)">
@@ -28,9 +27,11 @@
 	<group unless="$(arg robot_connected)">
 		<node name="rosserial_node" pkg="robik" type="arduino_dummy.py">
 		</node>
-
-		<param name="use_gui" value="false" />
+		
+		<!-- joints of arm is published by driver -->
+		<!--<param name="use_gui" value="true" />
 		<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+		-->
 
 		<!--
 		<param name="use_sim_time" value="true" />
@@ -39,21 +40,13 @@
 		-->
 	</group>
 
-	<node name="robik_driver" pkg="robik" type="robik_driver">
-	</node>
-
 	<!-- x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
 	<node pkg="tf" type="static_transform_publisher" name="kinect_link_broadcaster"
 		args="-0.25 0 0.54 0 0.262 0 base_link camera_link 500" />
 	<node pkg="tf" type="static_transform_publisher" name="depthimage_to_laserscan_link_broadcaster"
 		args="0 0 0 0 -0.262 0 camera_link depthimage_to_laserscan_link 500" />
 
-	<group unless="$(arg robot_connected)">
-		<node pkg="tf" type="static_transform_publisher" name="dummymap_link_broadcaster"
-			args="0 0 0 0 0 0 map base_link 500" />
-	</group>
-
-<!--
+<!--  OKO
 	<node pkg="tf" type="static_transform_publisher" name="cam_oko_link_broadcaster"
 		args="-0.20 -0.05 0.40 0 0 0 base_link cam_oko_link 500" />
 	<node name="cam_oko" pkg="usb_cam" type="usb_cam_node" output="screen">
@@ -68,8 +61,8 @@
 	</node>
 -->
 
-	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robik_state_publisher" />
-	<node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robik_pose_publisher" />
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+	<node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" />
 	<node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
 
 	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
@@ -93,6 +86,7 @@
 			<remap from="image" to="/camera/depth/image_raw" />
 			<remap from="scan" to="/base_scan/scan" />
 		</node>
+
 		<include file="$(find robik)/launch/robik_slam.launch" />
 
 	</group>
@@ -100,18 +94,35 @@
 	<node name="webnode" pkg="robik" type="webnode.sh" />
 
 	<node name="robik_ai" pkg="robik" type="robik_ai.py" />
-
+<!--
 	<node name="robik_action_arm" pkg="robik" type="robik_action_arm.py" />
 
 	<node name="robik_action_move" pkg="robik" type="robik_action_move.py" />
+-->
 
-	<!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default)
-	<include file="$(find robik_moveit_config)/launch/move_group.launch">
-		<arg name="allow_trajectory_execution" value="true"/>
-		<arg name="fake_execution" value="false"/>
-		<arg name="info" value="true"/>
-		<arg name="debug" value="$(arg debug)"/>
-	</include>
-	<include file="$(find robik_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
-	-->
+	<!-- Run the main MoveIt executable -->
+	<group if="$(arg moveit)">
+
+		<!-- Start joint trajectory action controller -->
+		<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/robik_arm_controller.yaml" />
+		<node name="arm_controller_spawner" pkg="controller_manager" type="spawner" args="robik_arm_controller" />
+
+		<include file="$(find robik_moveit_config)/launch/planning_context.launch">
+			<arg name="load_robot_description" value="true"/>
+		</include>
+	
+		<include file="$(find robik_moveit_config)/launch/move_group.launch">
+			<arg name="allow_trajectory_execution" value="true"/>
+			<arg name="fake_execution" value="false"/>
+			<arg name="info" value="true"/>
+			<arg name="debug" value="$(arg debug)"/>
+		</include>
+<!--
+  <rosparam command="load" file="$(find robik_moveit_config)/config/robik_gripper_controller.yaml" />
+  <node name="gripper_controller_spawner" pkg="pr2_controller_manager" type="spawner" args="robik_gripper_controller" />
+-->
+
+		<include file="$(find robik_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
+	</group>
+	
 </launch>

@@ -58,7 +58,7 @@ void publish_ai(const std::string &command){
 ////////////////// Callback for subscribers //////////////////
 
 void statusCallback(const robik::GenericStatus& msg) {
-checkClampAndStop();  //TODO
+//checkClampAndStop();  //TODO
 	//bumper
 	bumperFront = msg.bumper_front;
 
@@ -204,10 +204,10 @@ void headCallback(const geometry_msgs::Twist& msg) {
 }
 
 void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg) {
-	arm_controller_set_trajectory(trajectory_msg);
-	const robik::ArmControl *arm_msg;
-	arm_msg = arm_get_arm_control_command();
-	pub_arm_control.publish(*arm_msg);
+//	arm_controller_set_trajectory(trajectory_msg);
+	robik::ArmControl *p_arm_msg;
+//	p_arm_msg = arm_get_arm_control_command();
+//	pub_arm_control.publish(*p_arm_msg);
 }
 
 ////////////////// Main //////////////////
@@ -243,8 +243,12 @@ int main(int argc, char **argv) {
 
 //ros::spin();
 	ros::Rate loop_rate(20);
+	sensor_msgs::JointState arm_joint_state;
+	init_joint_state_message(&arm_joint_state);
+
 	while (ros::ok()) {
-		pub_arm.publish(*(arm_get_joint_state()));   //publish arm joint state regularly
+		arm_get_joint_state(&arm_joint_state);
+//		pub_arm.publish(arm_joint_state);   //publish arm joint state regularly
 		ros::spinOnce();
 		loop_rate.sleep();
 	}

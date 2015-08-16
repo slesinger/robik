@@ -16,7 +16,6 @@ sensor_msgs::JointState arm_target;  //desired position of arm control
 
 robik::ArmControl arm_control_msg;   //message to be send to arduino, reusing memory
 
-void init_joint_state_message(sensor_msgs::JointState *msg);
 void init_arm_control_message();
 void arm_kalman_init();
 
@@ -32,6 +31,7 @@ void arm_init() {
 
 	arm_kalman_init();
 }
+
 
 /**
 * init message that is published from driver, contains arm joint state in radians
@@ -77,31 +77,27 @@ void arm_kalman_init() {
 */
 void arm_set_joint_state(const robik::GenericStatus *msg) {
 
-	Mat prediction = KF.predict((Mat_<float>(5,1) << 0, 0, 0, 0, 0));  //controlMatrix  //TODO put true values here
+	Mat prediction = KF.predict((Mat_<float>(5,1) << msg->arm_yaw, msg->arm_shoulder, msg->arm_elbow, msg->arm_roll, msg->arm_clamp));  //controlMatrix  //TODO put true values here
 	Mat estimated = KF.correct((Mat_<float>(5,1) << msg->arm_yaw, msg->arm_shoulder, msg->arm_elbow, msg->arm_roll, msg->arm_clamp));  //measurementMatrix
 
 	arm_state.header.stamp = ros::Time::now();
-	arm_state.position[0] = map_check_inf(estimated.at<float>(0), ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
-	arm_state.position[1] = map_check_inf(prediction.at<float>(1), ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
-	arm_state.position[2] = map_check_inf(prediction.at<float>(2), ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
-	arm_state.position[3] = map_check_inf(prediction.at<float>(3), ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
-	arm_state.position[4] = map_check_inf(prediction.at<float>(4), ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
+//	arm_state.position[0] = map_check_inf(prediction.at<float>(0), ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
+//	arm_state.position[1] = map_check_inf(prediction.at<float>(1), ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
+//	arm_state.position[2] = map_check_inf(prediction.at<float>(2), ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
+//	arm_state.position[3] = map_check_inf(prediction.at<float>(3), ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
+//	arm_state.position[4] = map_check_inf(prediction.at<float>(4), ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
+	arm_state.position[0] = map_check_inf(msg->arm_yaw, ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
+	arm_state.position[1] = map_check_inf(msg->arm_shoulder, ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
+	arm_state.position[2] = map_check_inf(msg->arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
+	arm_state.position[3] = map_check_inf(msg->arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
+	arm_state.position[4] = map_check_inf(msg->arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
 }
 
-void set_joint_state_message(sensor_msgs::JointState *msg) {
-	msg->header.frame_id = "base_link";
-	msg->name.resize(5);
-	msg->position.resize(5);
-	msg->name[0] = "yaw_joint";
-	msg->name[1] = "shoulder_joint";
-	msg->name[2] = "elbow_joint";
-	msg->name[3] = "roll_joint";
-	msg->name[4] = "clamp_joint";
-}
 
 /**
 * Publish arm commands to arduino. Info received from (web) control widget (/robik_arm_controller_joint_states topic)
 * Recevies info in radians, converts to servo physical PWM signal values
+* JointTrajectory is not handled by this function directly but via a control server
 */
 void arm_set_controller_state(const trajectory_msgs::JointTrajectory& msg) { //TODO if there will be more points planned in advance execute them one by one
 
@@ -129,10 +125,10 @@ void arm_set_controller_state(const trajectory_msgs::JointTrajectory& msg) { //T
   }
   arm_target.header.stamp = ros::Time::now() + msg.points[0].time_from_start; //JointTrajectory_getTimeFromStart(msg);//TODO zmatek prepromyslet //when should arm reach this point, defined as duraion from start
 
-  arm_origin = arm_get_joint_state(); //populate from real position read from sensors            zmatek protoze vraci pointer
+  arm_get_joint_state(&arm_origin); //populate from real position read from sensors            zmatek protoze vraci pointer
 }
 
-const robik::ArmControl* arm_get_arm_controll_command(){
+robik::ArmControl* arm_get_arm_controll_command(){
 
 	arm_control_msg.header.stamp = ros::Time::now();  //command valid at current time
 	//TODO tady vypocitat aktualni controll prikaz, takze interpolace
@@ -144,9 +140,11 @@ void arm_set_arm_controll_command(){
 }
 
 //provide data read from arm sensors
-const sensor_msgs::JointState* arm_get_joint_state() {
+void arm_get_joint_state(sensor_msgs::JointState *dest) {
 	//TODO read from sensors current state at time of query
-	return &arm_state;
+	for (int i=0; i<=4; i++) {
+		dest->position[i] = arm_state.position[i];
+	}
 }
 
 float JointTrajectory_getPosition(const trajectory_msgs::JointTrajectory& msg, const char * joint_name) {
@@ -163,6 +161,7 @@ float JointTrajectory_getPosition(const trajectory_msgs::JointTrajectory& msg, c
   return FLOAT_NAN + 1;
 }
 
+/*
 potrebuji?
 //Returns time in milliseconds
 int JointTrajectory_getTimeFromStart(const trajectory_msgs::JointTrajectory& msg) {
@@ -235,4 +234,4 @@ estimated_clamp_pos.target_pos = 300;
     // armSetJointState(estimatedClampPos, 0, 0, 0, 0, 80);
   // }
 }
-
+*/

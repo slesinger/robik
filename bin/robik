@@ -1,22 +1,25 @@
 #!/bin/bash
 
 robot_host="robik"
+source /opt/ros/indigo/setup.bash
 source /opt/ros/jade/setup.bash
 source /home/honza/workspace/devel/setup.bash
 
 
 #------ end of user defined config --------
 
-#set volume to 100%
 amixer set Speaker playback 100% unmute
-#pactl set-sink-volume 0 100%
 echo "Startuji" | festival --tts --language czech
 
+echo "*******************"
 if lsusb | grep --quiet 2341:0010 ; then
     export CONNECTED="true"
+    echo "Arduino je PRIPOJENO"
 else
     export CONNECTED="false"
+    echo "Arduino NENI pripojeno"
 fi
+echo "*******************"
 
 export ROS_MASTER_URI=http://$robot_host:11311/
 export ROS_HOSTNAME=$robot_host

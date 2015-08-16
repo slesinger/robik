@@ -15,14 +15,14 @@
 
 
 void arm_init(); //constructor
+void init_joint_state_message(sensor_msgs::JointState *msg);
 
 //from arduino
 void arm_set_joint_state(const robik::GenericStatus *msg);  //set received joint state from arduino sensors to arm_state
-const sensor_msgs::JointState* arm_get_joint_state(); //read arm_state
+void arm_get_joint_state(sensor_msgs::JointState *dest); //read arm_state
 
 //to arduino
-void arm_controller_set_trajectory(const trajectory_msgs::JointTrajectory& msg);  //receive trajectory from web or moveit
-const robik::ArmControl* arm_get_arm_control_command();  //get message to be sent to arduino
+robik::ArmControl* arm_get_arm_control_command();  //get message to be sent to arduino
 
 float JointTrajectory_getPosition(const trajectory_msgs::JointTrajectory& msg, const char * joint_name);
 int JointTrajectory_getTimeFromStart(const trajectory_msgs::JointTrajectory& msg);
