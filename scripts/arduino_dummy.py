@@ -144,7 +144,7 @@ class Robik(object):
 
 		#TODO will need to interpolate during time
 
-		rospy.logerr("Y %d S %d E %d R %d C %d", yaw, shoulder, elbow, roll, clamp)
+		#rospy.logerr("Y %d S %d E %d R %d C %d", yaw, shoulder, elbow, roll, clamp)
 
 		#Hodnoty PWM
 		ARM_MIN_CLAMP = 1200
@@ -200,7 +200,7 @@ class Robik(object):
 		if (clamp != 0):
 			self.servoSenseMedian_clamp    = self.map(clamp_deg   , ARM_DEG_MIN_CLAMP   , ARM_DEG_MAX_CLAMP   , ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP)
 		# rospy.loginfo("PWM %f > DEG %f > RES %f", yaw, yaw_deg, self.servoSenseMedian_yaw)
-		rospy.logerr("y %d s %d e %d r %d c %d", self.servoSenseMedian_yaw, self.servoSenseMedian_shoulder, self.servoSenseMedian_elbow, self.servoSenseMedian_roll, self.servoSenseMedian_clamp)
+		#rospy.logerr("y %d s %d e %d r %d c %d", self.servoSenseMedian_yaw, self.servoSenseMedian_shoulder, self.servoSenseMedian_elbow, self.servoSenseMedian_roll, self.servoSenseMedian_clamp)
 
 
 	def map(self, value, fromLow, fromHigh, toLow, toHigh):

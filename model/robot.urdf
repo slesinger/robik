@@ -1,5 +1,5 @@
 <!-- (x -dopredu +dozadu) (y -levo +vpravo) (z -dolu +nahoru) -->
-<robot name="robot">
+<robot name="robik">
 
 	<link name="base_link">
 		<visual>
@@ -124,6 +124,19 @@
 		<axis xyz="-1 0 0" />
 		<limit lower="0" upper="0.6981317008" effort="1000" velocity="1" />
 		<!--<mimic joint="clamp_joint" multiplier="-1" offset="0"/>-->
+	</joint>
+
+	<link name="left_wheel" />
+	<link name="right_wheel" />
+
+	<joint name="wheel_left_joint" type="continuous">
+		<parent link="base_link"/>
+		<child link="left_wheel"/>
+	</joint>
+
+	<joint name="wheel_right_joint" type="continuous">
+		<parent link="base_link"/>
+		<child link="right_wheel"/>
 	</joint>
 
 </robot>

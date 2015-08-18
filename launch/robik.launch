@@ -6,7 +6,7 @@
 	<arg name="ros_workspace" value="/home/honza/workspace" />
 	<arg name="debug" default="false" />
 	<arg name="moveit" default="true" />
-	<arg name="db" default="true" />
+	<arg name="db" default="false" />
 	<param name="robot_description" command="cat $(find robik)/model/robot.urdf" />
 	<param name="publish_frequency" value="10" />
 
@@ -14,8 +14,14 @@
 		respawn="true" >
 	</node>
 
-	<node name="robik_driver" pkg="robik" type="robik_driver">
-	</node>
+	<node name="robik_driver" pkg="robik" type="robik_driver" output="screen" />
+	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" />
+
+	<!-- Start joint trajectory action controller -->
+	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/joint_trajectory_controllers.yaml" />
+	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/mobile_base_controller.yaml" />
+	<rosparam command="load" file="$(find robik)/launch/robik_sensors_config/imu_sensor_controller.yaml" />
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="--shutdown-timeout=2 arm_controller gripper_controller mobile_base_controller imu_sensor_controller"/>
 
 	<group if="$(arg robot_connected)">
 		<node name="rosserial_node" pkg="rosserial_python" type="serial_node.py"
@@ -103,24 +109,13 @@
 	<!-- Run the main MoveIt executable -->
 	<group if="$(arg moveit)">
 
-		<!-- Start joint trajectory action controller -->
-		<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/robik_arm_controller.yaml" />
-		<node name="arm_controller_spawner" pkg="controller_manager" type="spawner" args="robik_arm_controller" />
 
-		<include file="$(find robik_moveit_config)/launch/planning_context.launch">
-			<arg name="load_robot_description" value="true"/>
-		</include>
-	
 		<include file="$(find robik_moveit_config)/launch/move_group.launch">
 			<arg name="allow_trajectory_execution" value="true"/>
 			<arg name="fake_execution" value="false"/>
 			<arg name="info" value="true"/>
 			<arg name="debug" value="$(arg debug)"/>
 		</include>
-<!--
-  <rosparam command="load" file="$(find robik_moveit_config)/config/robik_gripper_controller.yaml" />
-  <node name="gripper_controller_spawner" pkg="pr2_controller_manager" type="spawner" args="robik_gripper_controller" />
--->
 
 		<include file="$(find robik_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
 	</group>

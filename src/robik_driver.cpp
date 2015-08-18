@@ -19,9 +19,10 @@
 //Services
 #include "robik/setParkingPhase.h"
 
+
 //towards Arduino
 ros::Publisher pub_generic_control;
-ros::Publisher pub_arm_control;
+ros::Publisher pub_arm_control;  //--
 
 //towards other nodes
 ros::Publisher pub_laser;
@@ -34,6 +35,7 @@ sensor_msgs::LaserScan laserscan_msg;
 
 //local function declarations
 void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg);
+
 
 ////////////////// Services //////////////////
 
@@ -156,7 +158,7 @@ void statusCallback(const robik::GenericStatus& msg) {
 	pub_odom.publish(robik_odom);
 
 	//arm joint state
-	arm_set_joint_state(&msg);
+	//arm_set_joint_state(&msg);
 
 	//IMU
 	sensor_msgs::Imu robik_imu;
@@ -222,7 +224,7 @@ int main(int argc, char **argv) {
 
 	//advertise topics to arduino
 	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 100);
-	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);
+//	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);  //--
 	pub_velocity_control = n.advertise<geometry_msgs::Twist>("robik_velocity_control", 100);
 
 	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
