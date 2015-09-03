@@ -4,16 +4,13 @@
 
 	<arg name="robot_connected" value="$(env CONNECTED)" />
 	<arg name="ros_workspace" value="/home/honza/workspace" />
-	<arg name="debug" default="false" />
+	<arg name="debug" default="true" />
 	<arg name="moveit" default="true" />
 	<arg name="db" default="false" />
 	<param name="robot_description" command="cat $(find robik)/model/robot.urdf" />
 	<param name="publish_frequency" value="10" />
 
-	<node name="sound_play" pkg="sound_play" type="soundplay_node.py"
-		respawn="true" >
-	</node>
-
+	<node name="sound_play" pkg="sound_play" type="soundplay_node.py" respawn="true" />
 	<node name="robik_driver" pkg="robik" type="robik_driver" output="screen" />
 	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" />
 
@@ -75,15 +72,9 @@
 		<arg name="port" value="9090" />
 	</include>
 
-	<node name="web_video_server" pkg="web_video_server" type="web_video_server">
-	</node>
+	<node name="web_video_server" pkg="web_video_server" type="web_video_server" />
 
-	<!-- <node name="voice_recognizer" pkg="pocketsphinx" type="recognizer.py"
-		output="screen"> <param name="lm" value="$(arg ros_workspace)/speech/config/nav_commands.lm"/>
-		<param name="dict" value="$(arg ros_workspace)/speech/config/nav_commands.dic"/>
-		</node> -->
-<!--
-	<group if="$(arg robot_connected)">
+	<group unless="$(arg robot_connected)">
 
 		<include file="$(find openni_launch)/launch/openni.launch" />
 		<node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan"
@@ -94,22 +85,18 @@
 		</node>
 
 		<include file="$(find robik)/launch/robik_slam.launch" />
-
 	</group>
--->
+
 	<node name="webnode" pkg="robik" type="webnode.sh" />
 
 	<node name="robik_ai" pkg="robik" type="robik_ai.py" />
 <!--
 	<node name="robik_action_arm" pkg="robik" type="robik_action_arm.py" />
-
 	<node name="robik_action_move" pkg="robik" type="robik_action_move.py" />
 -->
 
 	<!-- Run the main MoveIt executable -->
 	<group if="$(arg moveit)">
-
-
 		<include file="$(find robik_moveit_config)/launch/move_group.launch">
 			<arg name="allow_trajectory_execution" value="true"/>
 			<arg name="fake_execution" value="false"/>

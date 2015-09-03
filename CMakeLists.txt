@@ -28,6 +28,8 @@ find_package(catkin REQUIRED COMPONENTS
 #Profiling flags
 #SET(GCC_COVERAGE_COMPILE_FLAGS "-pg")
 #SET(GCC_COVERAGE_LINK_FLAGS    "-pg")
+#SET(GCC_COVERAGE_COMPILE_FLAGS "-ggdb")
+#SET(GCC_COVERAGE_LINK_FLAGS    "-ggdb")
 
 
 #######################################

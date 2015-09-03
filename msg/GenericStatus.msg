@@ -8,6 +8,7 @@ int32 parkSens_inner
 int32 parkSens_outer
 uint32 odom_millisSinceLastUpdate
 float32 ultrasound_Back
+uint8 arm_enabled
 int32 arm_yaw
 int32 arm_shoulder
 int32 arm_elbow

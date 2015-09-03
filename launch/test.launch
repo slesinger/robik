@@ -6,10 +6,10 @@
 	<param name="publish_frequency" value="10" />
 
 	<node name="rosserial_node" pkg="robik" type="arduino_dummy.py" output="screen" />
-	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" />
+<!--	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" launch-prefix="gdb +ex run ++args" /> -->
 
 	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/joint_trajectory_controllers.yaml" />
 	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/mobile_base_controller.yaml" />
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="--shutdown-timeout=2 arm_controller gripper_controller mobile_base_controller"/>
+<!--	<node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="++shutdown-timeout=2 arm_controller gripper_controller mobile_base_controller"/> -->
 
 </launch>

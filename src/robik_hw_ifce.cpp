@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <ros/console.h>
-#include "robik_hw_ifce.hpp"
+#include "robik_hw_ifce.h"
 #include "robik_util.h"
 #include "robik_api.h"
 
@@ -83,7 +83,7 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 	pos[2] = map_check_inf(msg.arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
 	pos[3] = map_check_inf(msg.arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
 	pos[4] = map_check_inf(msg.arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
-	ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
+//	ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
 }
 
 void RobikControllers::write_to_hw(){
@@ -94,8 +94,9 @@ void RobikControllers::write_to_hw(){
 	arm_control_msg.arm_elbow = map_unchecked(cmd[2], ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW, ARM_MIN_ELBOW, ARM_MAX_ELBOW);
 	arm_control_msg.arm_roll = map_unchecked(cmd[3], ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
 	arm_control_msg.arm_clamp = map_unchecked(cmd[4], ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
+	arm_control_msg.time_to_complete = 50; //20Hz in milliseconds, this is frequency of /robik_arm_control
 
-	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
+//	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
 	pub_arm_control.publish(arm_control_msg);
 }

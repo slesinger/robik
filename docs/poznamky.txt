@@ -1,7 +1,3 @@
-SVN 
-user: slesinger@gmail.com
-heslo: zP9pq2PV9QE4
-
 URDF
 ====
 MeshLab
