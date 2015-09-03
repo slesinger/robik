@@ -50,6 +50,7 @@ void RobikControllers::init() {
    // connect and register the joint position interface
    hardware_interface::JointHandle pos_handle_yaw(jnt_state_interface.getHandle("yaw_joint"), &cmd[0]);
    jnt_pos_interface.registerHandle(pos_handle_yaw);
+   ROS_INFO("INI arm_control %p %f", &cmd[1],cmd[1]);
    hardware_interface::JointHandle pos_handle_shoulder(jnt_state_interface.getHandle("shoulder_joint"), &cmd[1]);
    jnt_pos_interface.registerHandle(pos_handle_shoulder);
    hardware_interface::JointHandle pos_handle_elbow(jnt_state_interface.getHandle("elbow_joint"), &cmd[2]);
@@ -95,6 +96,7 @@ void RobikControllers::write_to_hw(){
 	arm_control_msg.arm_roll = map_unchecked(cmd[3], ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
 	arm_control_msg.arm_clamp = map_unchecked(cmd[4], ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
 	arm_control_msg.time_to_complete = 50; //20Hz in milliseconds, this is frequency of /robik_arm_control
+	ROS_INFO("WRI arm_control %p %f", &cmd[1],cmd[1]);
 
 //	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
