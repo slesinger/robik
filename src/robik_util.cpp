@@ -2,7 +2,7 @@
 
 #define DEG_INFINITY 721
 
-float map_unchecked(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+double map_unchecked(double value, double fromLow, double fromHigh, double toLow, double toHigh) {
 
   if (fromHigh == fromLow)
     return fromLow;
@@ -10,7 +10,7 @@ float map_unchecked(float value, float fromLow, float fromHigh, float toLow, flo
   return (value-fromLow) * ( (toHigh-toLow) / (fromHigh-fromLow) )+toLow;
 }
 
-float map_check_inf(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+double map_check_inf(double value, double fromLow, double fromHigh, double toLow, double toHigh) {
 
     float val = map_unchecked(value, fromLow, fromHigh, toLow, toHigh);
     if (val < toLow) val = DEG_INFINITY;
@@ -18,9 +18,9 @@ float map_check_inf(float value, float fromLow, float fromHigh, float toLow, flo
     return val;
 }
 
-float map(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+double map(double value, double fromLow, double fromHigh, double toLow, double toHigh) {
 
-    float val = map_unchecked(value, fromLow, fromHigh, toLow, toHigh);
+    double val = map_unchecked(value, fromLow, fromHigh, toLow, toHigh);
     if (val < toLow) val = toLow;
     if (val > toHigh) val = toHigh;
     return val;
