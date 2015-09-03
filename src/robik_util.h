@@ -18,9 +18,9 @@
 #define FLOAT_NAN 999
 
 
-float map_unchecked(float value, float fromLow, float fromHigh, float toLow, float toHigh);
-float map_check_inf(float value, float fromLow, float fromHigh, float toLow, float toHigh);
-float map(float value, float fromLow, float fromHigh, float toLow, float toHigh);
+double map_unchecked(double value, double fromLow, double fromHigh, double toLow, double toHigh);
+double map_check_inf(double value, double fromLow, double fromHigh, double toLow, double toHigh);
+double map(double value, double fromLow, double fromHigh, double toLow, double toHigh);
 
 
 #endif /* ROBIK_UTIL_H_ */
