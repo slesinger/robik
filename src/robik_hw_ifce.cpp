@@ -90,11 +90,11 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 void RobikControllers::write_to_hw(){
 	//arm
 	arm_control_msg.header.stamp = ros::Time::now();
-	arm_control_msg.arm_yaw = map_unchecked(cmd[0], ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW, ARM_MIN_YAW, ARM_MAX_YAW);
-	arm_control_msg.arm_shoulder = map_unchecked(cmd[1], ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER, ARM_MIN_SHOULDER, ARM_MAX_SHOULDER);
-	arm_control_msg.arm_elbow = map_unchecked(cmd[2], ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW, ARM_MIN_ELBOW, ARM_MAX_ELBOW);
-	arm_control_msg.arm_roll = map_unchecked(cmd[3], ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
-	arm_control_msg.arm_clamp = map_unchecked(cmd[4], ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
+	arm_control_msg.arm_yaw = (unsigned int) map_unchecked(cmd[0], ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW, ARM_MIN_YAW, ARM_MAX_YAW);
+	arm_control_msg.arm_shoulder = (unsigned int) map_unchecked(cmd[1], ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER, ARM_MIN_SHOULDER, ARM_MAX_SHOULDER);
+	arm_control_msg.arm_elbow = (unsigned int) map_unchecked(cmd[2], ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW, ARM_MIN_ELBOW, ARM_MAX_ELBOW);
+	arm_control_msg.arm_roll = (unsigned int) map_unchecked(cmd[3], ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
+	arm_control_msg.arm_clamp = (unsigned int) map_unchecked(cmd[4], ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
 	arm_control_msg.time_to_complete = 50; //20Hz in milliseconds, this is frequency of /robik_arm_control
 	ROS_INFO("WRI arm_control %p %f", &cmd[1],cmd[1]);
 
