@@ -6,12 +6,10 @@
 #include "robik_state.h"
 #include "robik_driver.h"
 #include "robik_util.h"
-#include "robik_arm.h"
-#include "robik_move.h"
+///#include "robik_move.h"
 
 //Messages
 #include "sensor_msgs/LaserScan.h"
-#include "sensor_msgs/Imu.h"
 #include "std_msgs/String.h"
 #include "robik/GenericStatus.h"
 #include "robik/GenericControl.h"
@@ -22,19 +20,14 @@
 
 //towards Arduino
 ros::Publisher pub_generic_control;
-ros::Publisher pub_arm_control;  //--
+ros::Publisher pub_arm_control;
 
 //towards other nodes
 ros::Publisher pub_laser;
 ros::Publisher pub_odom;
-ros::Publisher pub_imu;
-ros::Publisher pub_arm;
 ros::Publisher pub_ai;
 
 sensor_msgs::LaserScan laserscan_msg;
-
-//local function declarations
-void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg);
 
 
 ////////////////// Services //////////////////
@@ -60,7 +53,6 @@ void publish_ai(const std::string &command){
 ////////////////// Callback for subscribers //////////////////
 
 void statusCallback(const robik::GenericStatus& msg) {
-//checkClampAndStop();  //TODO
 	//bumper
 	bumperFront = msg.bumper_front;
 
@@ -157,31 +149,7 @@ void statusCallback(const robik::GenericStatus& msg) {
 
 	pub_odom.publish(robik_odom);
 
-	//arm joint state
-	//arm_set_joint_state(&msg);
 
-	//IMU
-	sensor_msgs::Imu robik_imu;
-	robik_imu.header.stamp = current_time;
-	robik_imu.header.frame_id = "base_link";
-	//robik_imu.orientation.w = msg.imu_orientation_quaternion_w;
-	//robik_imu.orientation.x = msg.imu_orientation_quaternion_x;
-	//robik_imu.orientation.y = msg.imu_orientation_quaternion_y;
-	//robik_imu.orientation.z = msg.imu_orientation_quaternion_z;
-	robik_imu.angular_velocity.x = msg.imu_angular_velocity_v3_x[0];
-	robik_imu.angular_velocity.y = msg.imu_angular_velocity_v3_y[0];
-	robik_imu.angular_velocity.z = msg.imu_angular_velocity_v3_z[0];
-	robik_imu.linear_acceleration.x = msg.imu_linear_acceleration_v3_x[0];
-	robik_imu.linear_acceleration.y = msg.imu_linear_acceleration_v3_y[0];
-	robik_imu.linear_acceleration.z = msg.imu_linear_acceleration_v3_z[0];
-	pub_imu.publish(robik_imu);
-
-	//Log
-	//ROS_INFO("Arduino: %s", msg.log_message.c_str());
-
-	/*ROS_INFO("RobikStatus: { bumperFront: %d, odomTicksLeft: %d, odomTicksRight: %d, sonar: %f, vx: %f, vy: %f, vth: %f, pos_x: %f, pos_y: %f, orientation: %f }",
-			bumperFront, odomTicksLeft, odomTicksRight, ultrasoundBack, vx, vy,
-			vth, odom_x, odom_y, odom_theta); */
 }
 
 void headCallback(const geometry_msgs::Twist& msg) {
@@ -205,13 +173,6 @@ void headCallback(const geometry_msgs::Twist& msg) {
 //x	pub_generic_control.publish(gen_msg);
 }
 
-void robik_arm_controller_joint_states_callback(const trajectory_msgs::JointTrajectory& trajectory_msg) {
-//	arm_controller_set_trajectory(trajectory_msg);
-	robik::ArmControl *p_arm_msg;
-//	p_arm_msg = arm_get_arm_control_command();
-//	pub_arm_control.publish(*p_arm_msg);
-}
-
 ////////////////// Main //////////////////
 
 int main(int argc, char **argv) {
@@ -220,11 +181,8 @@ int main(int argc, char **argv) {
 
 	ros::NodeHandle n;
 
-	arm_init();
-
 	//advertise topics to arduino
 	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 100);
-//	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);  //--
 	pub_velocity_control = n.advertise<geometry_msgs::Twist>("robik_velocity_control", 100);
 
 	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
@@ -235,22 +193,15 @@ int main(int argc, char **argv) {
 	//advertise topics from driver
 	pub_laser = n.advertise<sensor_msgs::LaserScan>("laser_data", 100);
 	pub_odom = n.advertise<nav_msgs::Odometry>("odom", 100);
-	pub_imu = n.advertise<sensor_msgs::Imu>("imu_data", 100);
-	pub_arm = n.advertise<sensor_msgs::JointState>("joint_states", 100);
 	pub_ai = n.advertise<std_msgs::String>("robik_ai", 100);
 
 	ros::Subscriber sub_cmdvel = n.subscribe("cmd_vel", 10, cmdvelCallback);
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko
-	ros::Subscriber sub_arm = n.subscribe("robik_arm_controller_joint_states", 10, robik_arm_controller_joint_states_callback);
 
 //ros::spin();
 	ros::Rate loop_rate(20);
-	sensor_msgs::JointState arm_joint_state;
-	init_joint_state_message(&arm_joint_state);
 
 	while (ros::ok()) {
-		arm_get_joint_state(&arm_joint_state);
-//		pub_arm.publish(arm_joint_state);   //publish arm joint state regularly
 		ros::spinOnce();
 		loop_rate.sleep();
 	}

@@ -41,7 +41,6 @@ add_action_files(
 	DIRECTORY
 		action
 	FILES
-		arm.action
 		move.action
 )
 
@@ -99,7 +98,7 @@ include_directories(include
 # )
 
 ## Declare a cpp executable
-add_executable(robik_driver src/robik_driver.cpp src/robik_util.cpp src/robik_arm.cpp src/robik_move.cpp)
+add_executable(robik_driver src/robik_driver.cpp src/robik_util.cpp src/robik_move.cpp)
 add_executable(robik_hw_ifce src/robik_hw_ifce.cpp src/robik_util.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -129,7 +128,6 @@ SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAG
 ## in contrast to setup.py, you can choose the destination
  install(PROGRAMS
    scripts/robik_ai.py
-   scripts/robik_action_arm.py
    scripts/robik_action_move.py
    scripts/arduino_dummy.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

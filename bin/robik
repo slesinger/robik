@@ -9,7 +9,9 @@ source /home/honza/workspace/devel/setup.bash
 #------ end of user defined config --------
 
 amixer set Speaker playback 100% unmute
-echo "Startuji" | festival --tts --language czech
+
+#nechapu, proc se festival zasekne
+#echo "Startuji" | festival --tts --language czech
 
 echo "*******************"
 if lsusb | grep --quiet 2341:0010 ; then

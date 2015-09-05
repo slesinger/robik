@@ -23,6 +23,7 @@ void init_arm_control_message() {
 void statusCallback(const robik::GenericStatus& msg) {
 	//arm
 	RobikControllers& p_robik_controllers = RobikControllers::get_instance();
+
 	p_robik_controllers.read_from_hw(msg);
 }
 
@@ -68,22 +69,39 @@ void RobikControllers::init() {
 
 	//IMU
 	imu_data.name = "IMU";
-    imu_data.frame_id = "base_frame";
-    imu_data.orientation = imu_orientation;
-    imu_data.angular_velocity = imu_angular_velocity;
-    imu_data.linear_acceleration = imu_linear_acceleration;
+	imu_data.frame_id = "base_link";
+	imu_data.orientation = imu_orientation;
+	imu_data.angular_velocity = imu_angular_velocity;
+	imu_data.linear_acceleration = imu_linear_acceleration;
 	hardware_interface::ImuSensorHandle imu_sensor_handle(imu_data);
 	imu_interface.registerHandle(imu_sensor_handle);
 	registerInterface(&imu_interface);
 }
 
 void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
-	pos[0] = map_check_inf(msg.arm_yaw, ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
-	pos[1] = map_check_inf(msg.arm_shoulder, ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
-	pos[2] = map_check_inf(msg.arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
-	pos[3] = map_check_inf(msg.arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
-	pos[4] = map_check_inf(msg.arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
-//	ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
+
+	//Arm joint state
+	if (msg.arm_enabled == 1) {
+		pos[0] = map_check_inf(msg.arm_yaw, ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
+		pos[1] = map_check_inf(msg.arm_shoulder, ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
+		pos[2] = map_check_inf(msg.arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
+		pos[3] = map_check_inf(msg.arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
+		pos[4] = map_check_inf(msg.arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
+	}
+	//ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
+
+	//IMU
+	imu_orientation[0] = msg.imu_compass_v3_x[0];  //TODO there can be more than [0] values captured within 50ms - [1], [2]
+	imu_orientation[1] = msg.imu_compass_v3_y[0];
+	imu_orientation[2] = msg.imu_compass_v3_z[0];
+	imu_orientation[3] = 1;  //TODO Is this correct to assume 1?
+	imu_angular_velocity[0] = msg.imu_angular_velocity_v3_x[0];
+	imu_angular_velocity[1] = msg.imu_angular_velocity_v3_y[0];
+	imu_angular_velocity[2] = msg.imu_angular_velocity_v3_z[0];
+	imu_linear_acceleration[0] = msg.imu_linear_acceleration_v3_x[0];
+	imu_linear_acceleration[1] = msg.imu_linear_acceleration_v3_y[0];
+	imu_linear_acceleration[2] = msg.imu_linear_acceleration_v3_z[0];
+
 }
 
 void RobikControllers::write_to_hw(){
@@ -95,7 +113,6 @@ void RobikControllers::write_to_hw(){
 	arm_control_msg.arm_roll = (unsigned int) map_unchecked(cmd[3] * RAD_TO_DEG, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
 	arm_control_msg.arm_clamp = (unsigned int) map_unchecked(cmd[4] * RAD_TO_DEG, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
 	arm_control_msg.time_to_complete = 50; //20Hz in milliseconds, this is frequency of /robik_arm_control
-	ROS_INFO("WRI arm_control %f > %d", cmd[1], arm_control_msg.arm_shoulder);
 
 //	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
@@ -103,14 +120,14 @@ void RobikControllers::write_to_hw(){
 }
 
 ros::Time RobikControllers::get_time(){
-  return ros::Time::now();
+	return ros::Time::now();
 }
 
 ros::Duration RobikControllers::get_period(){
-  ros::Time current_time = ros::Time::now();
-  ros::Duration period = current_time - last_time;
-  last_time = current_time;
-  return period;
+	ros::Time current_time = ros::Time::now();
+	ros::Duration period = current_time - last_time;
+	last_time = current_time;
+	return period;
 }
 
 int main(int argc, char **argv) {
@@ -130,7 +147,6 @@ int main(int argc, char **argv) {
 	controller_manager::ControllerManager cm(&robik_controllers, n);
 	ros::AsyncSpinner spinner(0, &my_callback_queue);
 	spinner.start();
-	
 
 	bool initialized = false;
 	unsigned int cnt = 0;
@@ -141,13 +157,13 @@ int main(int argc, char **argv) {
 				cnt++;
 			else {
 				initialized = true;
-				//ROS_INFO("pub initialized %s", "World");
 			}
 
 		}
 		cm.update(robik_controllers.get_time(), robik_controllers.get_period());
 		if (initialized) robik_controllers.write_to_hw();
 		nanosleep((const struct timespec[]){{0, 50000000L}}, NULL); //50ms
+		ros::spinOnce(); //in case of issue with not responding on commands, try to remove this but statusCallBack will not be called anymore
 	}
 	return 0;
 }
