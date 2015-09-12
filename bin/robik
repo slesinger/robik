@@ -16,10 +16,10 @@ amixer set Speaker playback 100% unmute
 echo "*******************"
 if lsusb | grep --quiet 2341:0010 ; then
     export CONNECTED="true"
-    echo "Arduino je PRIPOJENO"
+    echo "Arduino IS connected"
 else
     export CONNECTED="false"
-    echo "Arduino NENI pripojeno"
+    echo "Arduino is NOT connected"
 fi
 echo "*******************"
 

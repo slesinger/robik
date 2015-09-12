@@ -98,7 +98,7 @@ include_directories(include
 # )
 
 ## Declare a cpp executable
-add_executable(robik_driver src/robik_driver.cpp src/robik_util.cpp src/robik_move.cpp)
+add_executable(robik_driver src/robik_driver.cpp src/robik_util.cpp)
 add_executable(robik_hw_ifce src/robik_hw_ifce.cpp src/robik_util.cpp)
 
 ## Add cmake target dependencies of the executable/library

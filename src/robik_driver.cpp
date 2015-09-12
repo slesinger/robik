@@ -71,9 +71,6 @@ void statusCallback(const robik::GenericStatus& msg) {
 	else if ((mc & (MASK_MENU_UP | MASK_MENU_DOWN)) == (MASK_MENU_UP | MASK_MENU_DOWN))
 	  publish_ai("menu updown");
 
-	//odom
-	// odomMillisSinceLastUpdate = msg.odom_millisSinceLastUpdate;
-
 	//sonar
 	laserscan_msg.header.stamp = ros::Time::now();
 	laserscan_msg.header.frame_id = "laser_link";
@@ -88,67 +85,6 @@ void statusCallback(const robik::GenericStatus& msg) {
 	laserscan_msg.ranges[0] = msg.ultrasound_Back / 100;
 	laserscan_msg.ranges[1] = msg.ultrasound_Back / 100;
 	pub_laser.publish(laserscan_msg);
-
-	//odometry
-	static tf::TransformBroadcaster odom_broadcaster;
-	ros::Time current_time = ros::Time::now();
-	double vx = 0.0;
-	double vy = 0.0;
-	double vth = 0.0;
-	processOdomTicks(&vx, &vy, &vth, msg.odom_ticksLeft, msg.odom_ticksRight, msg.odom_millisSinceLastUpdate);
-
-	//ignore odom_theta calculated from wheel odometry and use IMU compass absolution heading instead
-	geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom_theta);
-
-	//first, we'll publish the transform over tf
-	geometry_msgs::TransformStamped odom_trans;
-	odom_trans.header.stamp = current_time;
-	odom_trans.header.frame_id = "odom";
-	odom_trans.child_frame_id = "base_link";
-
-	odom_trans.transform.translation.x = odom_x;
-	odom_trans.transform.translation.y = odom_y;
-	odom_trans.transform.translation.z = 0.0;
-	// odom_trans.transform.rotation.x = xmsg.imu_orientation_quaternion_x;
-	// odom_trans.transform.rotation.y = xmsg.imu_orientation_quaternion_y;
-	// odom_trans.transform.rotation.z = xmsg.imu_orientation_quaternion_z;
-	// odom_trans.transform.rotation.w = xmsg.imu_orientation_quaternion_w;
-	odom_trans.transform.rotation = odom_quat;
-	//send the transform
-	odom_broadcaster.sendTransform(odom_trans);
-
-	//publish odometry message over ROS
-	nav_msgs::Odometry robik_odom;
-	robik_odom.header.stamp = current_time;
-	robik_odom.header.frame_id = "odom";
-	robik_odom.child_frame_id = "base_link";
-
-	//set the position
-	robik_odom.pose.pose.position.x = odom_x;
-	robik_odom.pose.pose.position.y = odom_y;
-	robik_odom.pose.pose.position.z = 0.0;
-
-	// robik_odom.pose.pose.orientation.x = xmsg.imu_orientation_quaternion_x;
-	// robik_odom.pose.pose.orientation.y = xmsg.imu_orientation_quaternion_y;
-	// robik_odom.pose.pose.orientation.z = xmsg.imu_orientation_quaternion_z;
-	// robik_odom.pose.pose.orientation.w = xmsg.imu_orientation_quaternion_w;
-	robik_odom.pose.pose.orientation = odom_quat;
-
-	//set the velocity
-	robik_odom.twist.twist.linear.x = vx;
-	robik_odom.twist.twist.linear.y = vy;
-	//vth is taken from wheel odometry
-	robik_odom.twist.twist.angular.z = vth;
-// the values on diagonal are: X, Y, Z, Roll, Pitch, Yaw; small value means accuracy
-	robik_odom.twist.covariance =  boost::assign::list_of(0.0001) (0)      (0)   (0)   (0)   (0)
-                                                       (0)      (0.0001) (0)   (0)   (0)   (0)
-                                                       (0)      (0)      (1e6) (0)   (0)   (0)
-                                                       (0)      (0)      (0)   (1e6) (0)   (0)
-                                                       (0)      (0)      (0)   (0)   (1e6) (0)
-                                                       (0)      (0)      (0)   (0)   (0)   (0.003) ;
-
-	pub_odom.publish(robik_odom);
-
 
 }
 
@@ -183,7 +119,6 @@ int main(int argc, char **argv) {
 
 	//advertise topics to arduino
 	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 100);
-	pub_velocity_control = n.advertise<geometry_msgs::Twist>("robik_velocity_control", 100);
 
 	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
 
@@ -192,10 +127,8 @@ int main(int argc, char **argv) {
 
 	//advertise topics from driver
 	pub_laser = n.advertise<sensor_msgs::LaserScan>("laser_data", 100);
-	pub_odom = n.advertise<nav_msgs::Odometry>("odom", 100);
 	pub_ai = n.advertise<std_msgs::String>("robik_ai", 100);
 
-	ros::Subscriber sub_cmdvel = n.subscribe("cmd_vel", 10, cmdvelCallback);
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko
 
 //ros::spin();

@@ -5,11 +5,17 @@
 #include "robik_hw_ifce.h"
 #include "robik_util.h"
 #include "robik_api.h"
+#include "robot_config.h"
 
 //arm
 #include "robik/ArmControl.h"
+#include "robik/VelocityControl.h"
 robik::ArmControl arm_control_msg;   //message to be send to arduino, reusing memory
 ros::Publisher pub_arm_control;
+
+robik::VelocityControl velocity_control_msg;   //message to be send to arduino, reusing memory
+ros::Publisher pub_velocity_control;
+
 void init_arm_control_message() {
 	arm_control_msg.header.frame_id = "base_link";
 	arm_control_msg.header.stamp = ros::Time::now();
@@ -41,7 +47,7 @@ void RobikControllers::init() {
    jnt_state_interface.registerHandle(state_handle_roll);
    hardware_interface::JointStateHandle state_handle_clamp("clamp_joint", &pos[4], &vel[4], &eff[4]);
    jnt_state_interface.registerHandle(state_handle_clamp);
-   
+
    hardware_interface::JointStateHandle state_handle_left_wheel("wheel_left_joint",&pos[5],&vel[5],&eff[5]);
    jnt_state_interface.registerHandle(state_handle_left_wheel);
    hardware_interface::JointStateHandle state_handle_right_wheel("wheel_right_joint",&pos[6],&vel[6],&eff[6]);
@@ -61,11 +67,11 @@ void RobikControllers::init() {
    jnt_pos_interface.registerHandle(pos_handle_clamp);
    registerInterface(&jnt_pos_interface);
 
-   hardware_interface::JointHandle vel_handle_left_wheel(jnt_state_interface.getHandle("wheel_left_joint"), &cmd[5]);
-   jnt_vel_interface.registerHandle(vel_handle_left_wheel);
-   hardware_interface::JointHandle vel_handle_right_wheel(jnt_state_interface.getHandle("wheel_right_joint"), &cmd[6]);
-   jnt_vel_interface.registerHandle(vel_handle_right_wheel);
-   registerInterface(&jnt_vel_interface);
+	hardware_interface::JointHandle vel_handle_left_wheel(jnt_state_interface.getHandle("wheel_left_joint"), &cmd[5]);
+	jnt_vel_interface.registerHandle(vel_handle_left_wheel);
+	hardware_interface::JointHandle vel_handle_right_wheel(jnt_state_interface.getHandle("wheel_right_joint"), &cmd[6]);
+	jnt_vel_interface.registerHandle(vel_handle_right_wheel);
+	registerInterface(&jnt_vel_interface);
 
 	//IMU
 	imu_data.name = "IMU";
@@ -102,6 +108,36 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 	imu_linear_acceleration[1] = msg.imu_linear_acceleration_v3_y[0];
 	imu_linear_acceleration[2] = msg.imu_linear_acceleration_v3_z[0];
 
+	//Odom
+	#define MULTIPLIER 11.5
+	pos[5] += msg.odom_ticksLeft  * (TICK_LENGTH_MM / 1000) * MULTIPLIER;  //traveled distance [m]
+	pos[6] += msg.odom_ticksRight * (TICK_LENGTH_MM / 1000) * MULTIPLIER;
+	vel[5] = 0;  //not used by diff_drive odometry.cpp
+	vel[6] = 0;
+	eff[5] = 0;
+	eff[6] = 0;
+
+/*
+double odom_x = 0;
+double odom_y = 0;
+double odom_theta = 0;
+
+  double dr = odomTicksRight * (TICK_LENGTH_MM / 1000); //left wheel traveled distance in meters
+  double dl = odomTicksLeft * (TICK_LENGTH_MM / 1000); //right wheel
+
+  double dDist = (dr + dl) / 2; //distance of base link traveled in meters
+  double dTheta = (dr - dl) / (AXIAL_LENGTH_MM /1000); //change in orientation [radians???]
+
+  odom_theta = odom_theta + dTheta;
+  double vel_t_x = (dDist * cos(odom_theta)); //distance traveled since last update on x axis [meters]
+  double vel_t_y = (dDist * sin(odom_theta)); //y axis
+  odom_x = odom_x + vel_t_x; //new absolute position related to starting point of robot
+  odom_y = odom_y + vel_t_y;
+
+  *vx = vel_t_x * odom_millisSinceLastUpdate / 1000; //velocity on x axis [meters/second)
+  *vy = vel_t_y * odom_millisSinceLastUpdate / 1000; //y axis
+  *vth = dTheta; //speed of rotation
+*/
 }
 
 void RobikControllers::write_to_hw(){
@@ -117,6 +153,13 @@ void RobikControllers::write_to_hw(){
 //	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
 	pub_arm_control.publish(arm_control_msg);
+
+	//Velocity
+	velocity_control_msg.header.stamp = ros::Time::now();
+	velocity_control_msg.motor_left = cmd[5] / 10;
+	velocity_control_msg.motor_right = cmd[6] / 10;
+	pub_velocity_control.publish(velocity_control_msg);
+
 }
 
 ros::Time RobikControllers::get_time(){
@@ -138,6 +181,7 @@ int main(int argc, char **argv) {
 	robik_controllers.init();
 	init_arm_control_message();
 	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);
+	pub_velocity_control = n.advertise<robik::VelocityControl>("robik_velocity_control", 100);
 
 	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
 
