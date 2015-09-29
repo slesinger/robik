@@ -19,7 +19,7 @@ recovery_behaviors: [{name: conservative_clear, type: clear_costmap_recovery/Cle
                      {name: aggressive_clear, type: clear_costmap_recovery/ClearCostmapRecovery}]
 
 NavfnROS:
-  allow_unknown: false
+  allow_unknown: true
 
 conservative_clear:
   reset_distance: 3.0
