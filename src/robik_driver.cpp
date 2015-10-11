@@ -84,7 +84,7 @@ void statusCallback(const robik::GenericStatus& msg) {
 	laserscan_msg.ranges.resize((int) 2);
 	laserscan_msg.ranges[0] = msg.ultrasound_Back / 100;
 	laserscan_msg.ranges[1] = msg.ultrasound_Back / 100;
-	pub_laser.publish(laserscan_msg);
+	//pub_laser.publish(laserscan_msg);  at se mi to neplete do kinectu
 
 }
 
