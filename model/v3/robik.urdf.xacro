@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+
+<!-- (x/red +dopredu -dozadu) (y/green -levo +vpravo) (z/blue -dolu +nahoru) -->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robik">
+
+	<!-- constants -->
+	<xacro:property name="pi" value="3.1415926535897931" />
+	<xacro:property name="pi_half" value="${pi /2}" />
+	<xacro:property name="plastic_thickness" value="0.006" />
+
+	<!-- measurements -->
+	<xacro:property name="base_above_gnd" value="0.065" />
+	<xacro:property name="base_lenght" value="0.365" />
+	<xacro:property name="base_width" value="0.352" />
+	<xacro:property name="wheel_radius" value="0.05" />
+	<xacro:property name="wheel_distance" value="0.30" />
+	<xacro:property name="backbone_length" value="0.485" />
+
+	<!-- materials -->
+	<material name="clear_plastic">
+		<color rgba="0.81 0.81 0.81 0.5" />
+	</material>
+	<material name="alum">
+		<color rgba="0.81 0.88 0.91 1" />
+	</material>
+	<material name="wood">
+		<color rgba="1 0.81 0.4 1" />
+	</material>
+	<material name="jetson">
+		<texture filename="package://robik/model/v3/textures/jetson.jpg" />
+	</material>
+
+	<!-- base -->
+	<link name="base_link">
+		<visual name="base">
+			<origin xyz="0 0 ${base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="package://robik/model/v3/meshes/base-binary.stl" scale="1.0 1.0 1.0" />
+			</geometry>
+			<material name="clear_plastic" />
+		</visual>
+		<collision>
+			<origin xyz="-0.06 0 ${base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<box size="${base_lenght} ${base_width} ${plastic_thickness}" />
+			</geometry>
+		</collision>
+		<collision>
+			<origin xyz="0.115 0 ${base_above_gnd + plastic_thickness}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.01 ${base_width} 0.01" />
+			</geometry>
+		</collision>
+
+		<visual name="caster">
+			<origin xyz="-0.20 0 ${base_above_gnd / 2}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.05 0.01 ${base_above_gnd}" />
+			</geometry>
+			<material name="clear_plastic" />
+		</visual>
+		<collision>
+			<origin xyz="-0.20 0 ${base_above_gnd / 2}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.05 0.01 ${base_above_gnd}" />
+			</geometry>
+		</collision>
+
+		<xacro:macro name="backbone_templ" params="y name_tmpl">
+			<visual name="{$name_tmpl}_visual">
+				<origin xyz="-0.225 ${y} ${backbone_length / 2 + base_above_gnd}" rpy="0 0 0" />
+				<geometry>
+					<box size="0.01 0.01 ${backbone_length}" />
+				</geometry>
+				<material name="alum" />
+			</visual>
+			<collision>
+				<origin xyz="-0.225 ${y} ${backbone_length / 2 + base_above_gnd}" rpy="0 0 0" />
+				<geometry>
+					<box size="0.01 0.01 ${backbone_length}" />
+				</geometry>
+			</collision>
+		</xacro:macro>
+		<xacro:backbone_templ y="0.07" name_tmpl="left_backbone"/>
+		<xacro:backbone_templ y="-0.07" name_tmpl="right_backbone"/>
+
+		<xacro:property name="head_base_templ">
+			<origin xyz="${-0.20 - 0.06/2 + 0.01/2} 0 ${backbone_length + base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.06 0.22 0.02" />
+			</geometry>
+		</xacro:property>
+		<visual name="head_base">
+			<xacro:insert_block name="head_base_templ" />
+			<material name="wood" />
+		</visual>
+		<collision>
+			<xacro:insert_block name="head_base_templ" />
+		</collision>
+
+		<xacro:property name="jetson_templ">
+			<origin xyz="-0.22 0 ${0.1525 + base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<box size="${plastic_thickness} 0.125 0.125" />
+			</geometry>
+		</xacro:property>
+		<visual name="jetson">
+			<xacro:insert_block name="jetson_templ" />
+			<material name="jetson" />
+		</visual>
+		<collision>
+			<xacro:insert_block name="jetson_templ" />
+		</collision>
+
+		<xacro:property name="jetson_cover_templ">
+			<origin xyz="-0.205 0 ${0.14 + base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<box size="${plastic_thickness} 0.22 0.15" />
+			</geometry>
+		</xacro:property>
+		<visual name="jetson_cover">
+			<xacro:insert_block name="jetson_cover_templ" />
+			<material name="clear_plastic" />
+		</visual>
+		<collision>
+			<xacro:insert_block name="jetson_cover_templ" />
+		</collision>
+
+		<xacro:property name="arduino_cover_templ">
+			<origin xyz="-0.125 0 ${0.055 + base_above_gnd}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.17 0.25 ${plastic_thickness}" />
+			</geometry>
+		</xacro:property>
+		<visual name="arduino_cover">
+			<xacro:insert_block name="arduino_cover_templ" />
+			<material name="clear_plastic" />
+		</visual>
+		<collision>
+			<xacro:insert_block name="arduino_cover_templ" />
+		</collision>
+
+		<xacro:macro name="antenna_templ" params="y roll name_tmpl">
+			<visual name="{$name_tmpl}_visual">
+				<origin xyz="-0.225 ${y} ${0.26 + base_above_gnd}" rpy="${roll} 0 0" />
+				<geometry>
+					<box size="0.01 0.01 0.13" />
+				</geometry>
+				<material name="wheel" />
+			</visual>
+			<collision>
+				<origin xyz="-0.225 ${y} ${0.26 + base_above_gnd}" rpy="${roll} 0 0" />
+				<geometry>
+					<box size="0.01 0.01 0.13" />
+				</geometry>
+			</collision>
+		</xacro:macro>
+		<xacro:antenna_templ y="0.12" roll="-0.1745" name_tmpl="left_backbone"/>
+		<xacro:antenna_templ y="-0.12" roll="0.1745" name_tmpl="right_backbone"/>
+
+	</link>
+
+	<!-- wheels -->
+	<xacro:macro name="wheel_templ">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 ${pi_half} ${pi_half}" />
+			<geometry>
+				<cylinder radius="${wheel_radius}" length="0.04" />
+			</geometry>
+			<material name="black_wheel">
+				<color rgba="0.1 0.1 0.1 1" />
+			</material>
+		</visual>
+	</xacro:macro>
+
+	<link name="left_wheel">
+		<xacro:wheel_templ/>
+	</link>
+	<link name="right_wheel">
+		<xacro:wheel_templ/>
+	</link>
+
+	<joint name="wheel_left_joint" type="continuous">
+		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
+		<parent link="base_link"/>
+		<child link="left_wheel"/>
+	</joint>
+
+	<joint name="wheel_right_joint" type="continuous">
+		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
+		<parent link="base_link"/>
+		<child link="right_wheel"/>
+	</joint>
+
+	<link name="rear_sonar_link">
+		<visual>
+			<origin xyz="-0.015 0 0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.03 0.04 0.015" />
+			</geometry>
+			<material name="alum" />
+		</visual>
+	</link>
+	<joint name="rear_sonar_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="rear_sonar_link" />
+		<origin xyz="-0.24 0 ${0.015 + base_above_gnd}" rpy="0 0 ${pi}" />
+	</joint>
+
+	<!-- kinect -->
+	<xacro:include filename="$(find robik)/model/v3/kinect.urdf.xacro"/>
+	<xacro:sensor_kinect parent="base_link" />
+
+
+	<!-- arm -->
+	<link name="yaw_link">
+		<visual>
+			<origin xyz="0 0 ${0.06 / 2}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.045 0.04 0.06" />
+			</geometry>
+			<material name="wood" />
+		</visual>
+	</link>
+
+	<joint name="yaw_joint" type="revolute">
+		<parent link="base_link" />
+		<child link="yaw_link" />
+		<origin xyz="0.075 -0.08 ${base_above_gnd + plastic_thickness/2}" rpy="0 0 0" />
+		<axis xyz="0 0 -1" />
+		<limit lower="-1.8675023" upper="1.099557429" effort="1000" velocity="1" />
+	</joint>
+
+
+	<link name="shoulder_link">
+		<visual>
+			<origin xyz="0 0.0675 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.04 0.135 0.02" />
+			</geometry>
+			<material name="wood">
+				<color rgba="0 1.0 1.0 1.0" />
+			</material>
+		</visual>
+	</link>
+
+	<joint name="shoulder_joint" type="revolute">
+		<parent link="yaw_link" />
+		<child link="shoulder_link" />
+		<origin xyz="0.0 0 0.06" rpy="0 0 -1.570796327" />
+		<axis xyz="1 0 0" />
+		<limit lower="0" upper="2.094395102" effort="1000" velocity="1" />
+	</joint>
+
+
+	<link name="elbow_link">
+		<visual>
+			<origin xyz="0 0.0325 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.04 0.065 0.02" />
+			</geometry>
+			<material name="wood">
+				<color rgba="0 1.0 1.0 1.0" />
+			</material>
+		</visual>
+	</link>
+
+	<joint name="elbow_joint" type="revolute">
+		<parent link="shoulder_link" />
+		<child link="elbow_link" />
+		<origin xyz="0 0.135 0" rpy="0 0 0" />
+		<axis xyz="1 0 0" />
+		<limit lower="-1.919862177" upper="0.6981317008" effort="1000" velocity="1" />
+	</joint>
+
+
+	<link name="roll_link">
+		<visual>
+			<geometry>
+				<box size="0.03 0.003 0.04" />
+			</geometry>
+			<material name="wood">
+				<color rgba="0 1.0 1.0 1.0" />
+			</material>
+		</visual>
+	</link>
+
+	<joint name="roll_joint" type="revolute">
+		<parent link="elbow_link" />
+		<child link="roll_link" />
+		<origin xyz="0 0.065 0" rpy="0 0 0" />
+		<axis xyz="0 1 0" />
+		<limit lower="-1.570796327" upper="1.570796327" effort="1000" velocity="1" />
+	</joint>
+
+
+	<link name="clamp_link">
+		<visual>
+			<origin xyz="0 0.025 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.02 0.05 0.01" />
+			</geometry>
+			<material name="alum">
+				<color rgba="0 1.0 1.0 1.0" />
+			</material>
+		</visual>
+	</link>
+
+	<joint name="clamp_joint" type="revolute">
+		<parent link="roll_link" />
+		<child link="clamp_link" />
+		<origin xyz="0 0.001 -0.005" rpy="0 0 0" />
+		<axis xyz="-1 0 0" />
+		<limit lower="0" upper="0.6981317008" effort="1000" velocity="1" />
+		<!--<mimic joint="clamp_joint" multiplier="-1" offset="0"/>-->
+	</joint>
+
+</robot>

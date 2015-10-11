@@ -5,9 +5,9 @@
 	<arg name="robot_connected" value="$(env CONNECTED)" />
 	<arg name="ros_workspace" value="/home/honza/workspace" />
 	<arg name="debug" default="true" />
-	<arg name="moveit" default="true" />
+	<arg name="moveit" default="false" />
 	<arg name="db" default="false" />
-	<param name="robot_description" command="cat $(find robik)/model/robot.urdf" />
+	<param name="robot_description" command="$(find xacro)/xacro.py $(find robik)/model/v3/robik.urdf.xacro" />
 	<param name="publish_frequency" value="10" />
 
 	<node name="robik_driver" pkg="robik" type="robik_driver" output="screen" />
@@ -37,11 +37,9 @@
 		<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 		-->
 
-		<!--
 		<param name="use_sim_time" value="true" />
-		<node name="bagplayer" pkg="rosbag" type="play" output="screen" args="clock -l $(arg ros_workspace)/src/robik/bags/ruka.bag">
+		<node name="bagplayer" pkg="rosbag" type="play" output="screen" args="--clock -l $(arg ros_workspace)/src/robik/bags/nav.bag">
 		</node>
-		-->
 	</group>
 
 	<!-- x y z yaw pitch roll frame_id child_frame_id period_in_ms -->
@@ -66,14 +64,6 @@
 -->
 
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
-	<node pkg="robot_pose_publisher" type="robot_pose_publisher" name="robot_pose_publisher" />
-	<node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher" />
-
-	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-		<arg name="port" value="9090" />
-	</include>
-
-	<node name="web_video_server" pkg="web_video_server" type="web_video_server" />
 
 	<group if="$(arg robot_connected)">
 
@@ -85,8 +75,8 @@
 			<remap from="scan" to="/base_scan/scan" />
 		</node>
 
-		<include file="$(find robik)/launch/robik_slam.launch" />
 	</group>
+		<include file="$(find robik)/launch/robik_slam.launch" />
 
 	<node name="webnode" pkg="robik" type="webnode.sh" />
 
