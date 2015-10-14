@@ -11,6 +11,7 @@ mobile_base_controller:
 
   # Base frame_id
   base_frame_id: base_link_ifce
+  enable_odom_tf: false
 
 # Wheel separation and diameter. These are both optional.
   # diff_drive_controller will attempt to read either one or both from the
@@ -33,4 +34,3 @@ mobile_base_controller:
       max_velocity           : !degrees 120.0
       has_acceleration_limits: true
       max_acceleration       : !degrees 120.0
-
