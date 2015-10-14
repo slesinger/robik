@@ -2,12 +2,12 @@
 <robot name="sensor_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
 
   <!-- Robik position -->
-  <property name="cam_px" value="-0.19" />
-  <property name="cam_py" value="0" />
-  <property name="cam_pz" value="0.59" />
-  <property name="cam_or" value="0" />
-  <property name="cam_op" value="0.262" />
-  <property name="cam_oy" value="0" />
+  <xacro:property name="cam_px" value="-0.19" />
+  <xacro:property name="cam_py" value="0" />
+  <xacro:property name="cam_pz" value="0.59" />
+  <xacro:property name="cam_or" value="0" />
+  <xacro:property name="cam_op" value="0.262" />
+  <xacro:property name="cam_oy" value="0" />
 
   <!--  <xacro:include filename="$(find robik)/model/v3/kinect_gazebo.urdf.xacro"/> -->
 
