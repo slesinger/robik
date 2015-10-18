@@ -86,7 +86,7 @@
 		<xacro:backbone_templ y="-0.07" name_tmpl="right_backbone"/>
 
 		<xacro:property name="head_base_templ">
-			<origin xyz="${-0.20 - 0.06/2 + 0.01/2} 0 ${backbone_length + base_above_gnd}" rpy="0 0 0" />
+			<origin xyz="-0.225 0 ${backbone_length + base_above_gnd}" rpy="0 0 0" />
 			<geometry>
 				<box size="0.06 0.22 0.02" />
 			</geometry>
@@ -161,18 +161,22 @@
 
 	</link>
 
+<!--
+	<link name="base_footprint" />
+	<link name="base_stabilized" />
+
 	<joint name="base_footprint_joint" type="fixed">
 		<origin xyz="0 0 0" rpy="0 0 0" />
 		<parent link="base_footprint"/>
 		<child link="base_stabilized"/>
 	</joint>
 
-	<joint name="base_footprint_joint" type="fixed">
+	<joint name="base_stabilized_joint" type="fixed">
 		<origin xyz="0 0 0" rpy="0 0 0" />
 		<parent link="base_stabilized"/>
 		<child link="base_link"/>
 	</joint>
-
+-->
 
 	<!-- wheels -->
 	<xacro:macro name="wheel_templ">
