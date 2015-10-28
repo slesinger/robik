@@ -8,7 +8,6 @@
 	<arg name="moveit" default="false" />
 	<arg name="db" default="false" />
 	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find robik)/model/v3/robik.urdf.xacro" />
-	<param name="publish_frequency" value="10" />
 
 	<node name="robik_driver" pkg="robik" type="robik_driver" output="screen" />
 	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" />
@@ -48,7 +47,7 @@
 
 		<include file="$(find openni_launch)/launch/openni.launch" />
 		<node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan">
-			<param name="output_frame_id" value="camera_link" />
+			<param name="output_frame_id" value="base_scan_link" />
 			<remap from="image" to="/camera/depth/image_raw" />
 			<remap from="scan" to="/base_scan/scan" />
 		</node>

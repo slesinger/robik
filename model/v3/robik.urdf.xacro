@@ -11,7 +11,7 @@
 
 	<!-- measurements -->
 	<xacro:property name="base_above_gnd" value="0.065" />
-	<xacro:property name="base_lenght" value="0.365" />
+	<xacro:property name="base_length" value="0.365" />
 	<xacro:property name="base_width" value="0.352" />
 	<xacro:property name="wheel_radius" value="0.05" />
 	<xacro:property name="wheel_distance" value="0.30" />
@@ -43,7 +43,7 @@
 		<collision>
 			<origin xyz="-0.06 0 ${base_above_gnd}" rpy="0 0 0" />
 			<geometry>
-				<box size="${base_lenght} ${base_width} ${plastic_thickness}" />
+				<box size="${base_length} ${base_width} ${plastic_thickness}" />
 			</geometry>
 		</collision>
 		<collision>
@@ -67,23 +67,23 @@
 			</geometry>
 		</collision>
 
-		<xacro:macro name="backbone_templ" params="y name_tmpl">
+		<xacro:macro name="backbone_templ" params="y name_tmpl origin_z">
 			<visual name="{$name_tmpl}_visual">
-				<origin xyz="-0.225 ${y} ${backbone_length / 2 + base_above_gnd}" rpy="0 0 0" />
+				<origin xyz="-0.225 ${y} ${origin_z}" rpy="0 0 0" />
 				<geometry>
 					<box size="0.01 0.01 ${backbone_length}" />
 				</geometry>
 				<material name="alum" />
 			</visual>
 			<collision>
-				<origin xyz="-0.225 ${y} ${backbone_length / 2 + base_above_gnd}" rpy="0 0 0" />
+				<origin xyz="-0.225 ${y} ${origin_z}" rpy="0 0 0" />
 				<geometry>
 					<box size="0.01 0.01 ${backbone_length}" />
 				</geometry>
 			</collision>
 		</xacro:macro>
-		<xacro:backbone_templ y="0.07" name_tmpl="left_backbone"/>
-		<xacro:backbone_templ y="-0.07" name_tmpl="right_backbone"/>
+		<xacro:backbone_templ y="0.07" name_tmpl="left_backbone" origin_z="${backbone_length / 2 + base_above_gnd}" />
+		<xacro:backbone_templ y="-0.07" name_tmpl="right_backbone" origin_z="${backbone_length / 2 + base_above_gnd}" />
 
 		<xacro:property name="head_base_templ">
 			<origin xyz="-0.225 0 ${backbone_length + base_above_gnd}" rpy="0 0 0" />
@@ -228,6 +228,12 @@
 	<!-- kinect -->
 	<xacro:include filename="$(find robik)/model/v3/kinect.urdf.xacro"/>
 	<xacro:sensor_kinect parent="base_link" />
+	<link name="base_scan_link" />
+	<joint name="base_scan_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="base_scan_link" />
+		<origin xyz="-0.19 0 0.59" rpy="0 0 0" />
+	</joint>
 
 
 	<!-- arm -->
