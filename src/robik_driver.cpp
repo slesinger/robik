@@ -28,6 +28,7 @@ ros::Publisher pub_odom;
 ros::Publisher pub_ai;
 
 sensor_msgs::LaserScan laserscan_msg;
+sensor_msgs::LaserScan lidar_msg;
 
 
 ////////////////// Services //////////////////
@@ -86,6 +87,21 @@ void statusCallback(const robik::GenericStatus& msg) {
 	laserscan_msg.ranges[1] = msg.ultrasound_Back / 100;
 	//pub_laser.publish(laserscan_msg);  at se mi to neplete do kinectu
 
+	//lidar
+	lidar_msg.header.stamp = ros::Time::now();
+	lidar_msg.header.frame_id = "lidar_link";
+	lidar_msg.angle_min = 0.0; //[radians], 0=straight
+	lidar_msg.angle_max = 2.0 * M_PI;
+	lidar_msg.angle_increment = 2.0 * M_PI / 360.0;
+	lidar_msg.time_increment = msg.lidar_speed*2; //in 2 rpm steps
+	lidar_msg.range_min = 0.06; //[m]
+	lidar_msg.range_max = 5.0; //[m]
+	lidar_msg.ranges.reserve(360);
+	for (int i = 0; i < 360; i++) {
+		lidar_msg.ranges[i] = (float)(msg.lidar_data[i] * 2) / 100.0; //reported in 2cm steps
+	}
+	pub_lidar.publish(lidar_msg);
+	lidar_msg
 }
 
 void headCallback(const geometry_msgs::Twist& msg) {
@@ -127,6 +143,7 @@ int main(int argc, char **argv) {
 
 	//advertise topics from driver
 	pub_laser = n.advertise<sensor_msgs::LaserScan>("laser_data", 100);
+	pub_lidar = n.advertise<sensor_msgs::LaserScan>("lidar_data", 100);
 	pub_ai = n.advertise<std_msgs::String>("robik_ai", 100);
 
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko

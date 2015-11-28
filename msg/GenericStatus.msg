@@ -25,6 +25,8 @@ float32[3] imu_angular_velocity_v3_z
 float32[3] imu_linear_acceleration_v3_x
 float32[3] imu_linear_acceleration_v3_y
 float32[3] imu_linear_acceleration_v3_z
+uint32 lidar_speed
+uint8[360] lidar_data
 int32 imu_sample_count
 bool imu_gyro_bias_valid
 int32[] status_code
