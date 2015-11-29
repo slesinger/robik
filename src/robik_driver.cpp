@@ -24,6 +24,7 @@ ros::Publisher pub_arm_control;
 
 //towards other nodes
 ros::Publisher pub_laser;
+ros::Publisher pub_lidar;
 ros::Publisher pub_odom;
 ros::Publisher pub_ai;
 
@@ -101,7 +102,7 @@ void statusCallback(const robik::GenericStatus& msg) {
 		lidar_msg.ranges[i] = (float)(msg.lidar_data[i] * 2) / 100.0; //reported in 2cm steps
 	}
 	pub_lidar.publish(lidar_msg);
-	lidar_msg
+
 }
 
 void headCallback(const geometry_msgs::Twist& msg) {
