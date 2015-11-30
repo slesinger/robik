@@ -21,10 +21,18 @@
 
 
 	<group if="$(arg robot_connected)">
-		<node name="rosserial_node" pkg="rosserial_python" type="serial_node.py"
+		<!--<node name="rosserial_node" pkg="rosserial_python" type="serial_node.py"
 			args="/dev/ttyACM0" respawn="true">
-			<param name="baud" value="115200"/>
+			<param name="baud" value="500000"/>
+		</node>-->
+
+		<node name="rosserial_node" pkg="rosserial_server" type="serial_node">
+			<rosparam>
+                           port: /dev/ttyACM0
+                           baud: 500000
+                        </rosparam>
 		</node>
+		<node pkg="rosserial_python" type="message_info_service.py" name="rosserial_message_info" />
 	</group>
 
 	<group unless="$(arg robot_connected)">

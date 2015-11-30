@@ -97,16 +97,16 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 	//ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
 
 	//IMU
-	imu_orientation[0] = msg.imu_compass_v3_x[0];  //TODO there can be more than [0] values captured within 50ms - [1], [2]
-	imu_orientation[1] = msg.imu_compass_v3_y[0];
-	imu_orientation[2] = msg.imu_compass_v3_z[0];
+	imu_orientation[0] = msg.imu_compass_v3_x;
+	imu_orientation[1] = msg.imu_compass_v3_y;
+	imu_orientation[2] = msg.imu_compass_v3_z;
 	imu_orientation[3] = 1;  //TODO Is this correct to assume 1?
-	imu_angular_velocity[0] = msg.imu_angular_velocity_v3_x[0];
-	imu_angular_velocity[1] = msg.imu_angular_velocity_v3_y[0];
-	imu_angular_velocity[2] = msg.imu_angular_velocity_v3_z[0];
-	imu_linear_acceleration[0] = msg.imu_linear_acceleration_v3_x[0];
-	imu_linear_acceleration[1] = msg.imu_linear_acceleration_v3_y[0];
-	imu_linear_acceleration[2] = msg.imu_linear_acceleration_v3_z[0];
+	imu_angular_velocity[0] = msg.imu_angular_velocity_v3_x;
+	imu_angular_velocity[1] = msg.imu_angular_velocity_v3_y;
+	imu_angular_velocity[2] = msg.imu_angular_velocity_v3_z;
+	imu_linear_acceleration[0] = msg.imu_linear_acceleration_v3_x;
+	imu_linear_acceleration[1] = msg.imu_linear_acceleration_v3_y;
+	imu_linear_acceleration[2] = msg.imu_linear_acceleration_v3_z;
 
 	//Odom
 	#define MULTIPLIER 11.5
@@ -117,27 +117,6 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 	eff[5] = 0;
 	eff[6] = 0;
 
-/*
-double odom_x = 0;
-double odom_y = 0;
-double odom_theta = 0;
-
-  double dr = odomTicksRight * (TICK_LENGTH_MM / 1000); //left wheel traveled distance in meters
-  double dl = odomTicksLeft * (TICK_LENGTH_MM / 1000); //right wheel
-
-  double dDist = (dr + dl) / 2; //distance of base link traveled in meters
-  double dTheta = (dr - dl) / (AXIAL_LENGTH_MM /1000); //change in orientation [radians???]
-
-  odom_theta = odom_theta + dTheta;
-  double vel_t_x = (dDist * cos(odom_theta)); //distance traveled since last update on x axis [meters]
-  double vel_t_y = (dDist * sin(odom_theta)); //y axis
-  odom_x = odom_x + vel_t_x; //new absolute position related to starting point of robot
-  odom_y = odom_y + vel_t_y;
-
-  *vx = vel_t_x * odom_millisSinceLastUpdate / 1000; //velocity on x axis [meters/second)
-  *vy = vel_t_y * odom_millisSinceLastUpdate / 1000; //y axis
-  *vth = dTheta; //speed of rotation
-*/
 }
 
 void RobikControllers::write_to_hw(){
