@@ -5,7 +5,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro" name="robik">
 
 	<!-- constants -->
-	<xacro:property name="pi" value="3.1415926535897931" />
+	<!--<xacro:property name="pi" value="3.1415926535897931" /> -->
 	<xacro:property name="pi_half" value="${pi /2}" />
 	<xacro:property name="plastic_thickness" value="0.006" />
 

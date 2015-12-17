@@ -4,7 +4,7 @@
 
 	<arg name="robot_connected" value="$(env CONNECTED)" />
 	<arg name="ros_workspace" value="/home/honza/workspace" />
-	<arg name="debug" default="true" />
+	<arg name="debug" default="false" />
 	<arg name="moveit" default="true" />
 	<arg name="db" default="false" />
 	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find robik)/model/v3/robik.urdf.xacro" />
