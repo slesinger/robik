@@ -3,7 +3,6 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include "robik_api.h"
-#include "robik_state.h"
 #include "robik_driver.h"
 #include "robik_util.h"
 ///#include "robik_move.h"
@@ -55,53 +54,6 @@ void publish_ai(const std::string &command){
 ////////////////// Callback for subscribers //////////////////
 
 void statusCallback(const robik::GenericStatus& msg) {
-	//bumper
-	bumperFront = msg.bumper_front;
-
-	//menu_controls
-	uint8_t mc = msg.menu_controls;
-	if ((mc & MASK_MENU_MENU) == MASK_MENU_MENU)
-	  publish_ai("menu menu");
-	else if ((mc & MASK_MENU_OK) == MASK_MENU_OK)
-	  publish_ai("menu ok");
-	else if ((mc & MASK_MENU_CANCEL) == MASK_MENU_CANCEL)
-	  publish_ai("menu cancel");
-	else if ((mc & MASK_MENU_UP) == MASK_MENU_UP)
-	  publish_ai("menu up");
-	else if ((mc & MASK_MENU_DOWN) == MASK_MENU_DOWN)
-	  publish_ai("menu down");
-	else if ((mc & (MASK_MENU_UP | MASK_MENU_DOWN)) == (MASK_MENU_UP | MASK_MENU_DOWN))
-	  publish_ai("menu updown");
-
-	//sonar
-	laserscan_msg.header.stamp = ros::Time::now();
-	laserscan_msg.header.frame_id = "laser_link";
-	laserscan_msg.angle_min = -7 * M_PI / 180; //[radians], 0=straight
-	laserscan_msg.angle_max = 7 * M_PI / 180;
-	laserscan_msg.angle_increment = 2 * 7 * M_PI / 180;
-	laserscan_msg.time_increment = 0;
-	laserscan_msg.range_min = 1.0 / 100; //1cm
-	laserscan_msg.range_max = 200.0 / 100; //200cm
-	laserscan_msg.scan_time = 0.1;
-	laserscan_msg.ranges.resize((int) 2);
-	laserscan_msg.ranges[0] = msg.ultrasound_Back / 100;
-	laserscan_msg.ranges[1] = msg.ultrasound_Back / 100;
-	//pub_laser.publish(laserscan_msg);  at se mi to neplete do kinectu
-
-	//lidar
-	lidar_msg.header.stamp = ros::Time::now();
-	lidar_msg.header.frame_id = "lidar_link";
-	lidar_msg.angle_min = 0.0; //[radians], 0=straight
-	lidar_msg.angle_max = 2.0 * M_PI / 360 * msg.lidar_data.size();
-	lidar_msg.angle_increment = 2.0 * M_PI / 360.0;
-	lidar_msg.time_increment = msg.lidar_speed*2; //in 2 rpm steps
-	lidar_msg.range_min = 0.06; //[m]
-	lidar_msg.range_max = 5.0; //[m]
-	lidar_msg.ranges.reserve(msg.lidar_data.size());
-	for (int i = 0; i < msg.lidar_data.size(); i++) {
-		lidar_msg.ranges[i] = (float)(msg.lidar_data[i] * 2) / 100.0; //reported in 2cm steps
-	}
-	pub_lidar.publish(lidar_msg);
 
 }
 
