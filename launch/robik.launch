@@ -60,6 +60,8 @@
 			<remap from="scan" to="/base_scan/scan" />
 		</node>
 
+		<!-- This node is to enable map link to emaulate world coordinate while SLAM is disabled -->
+		<node pkg="tf" type="static_transform_publisher" name="map_to_base_broadcaster" args="0 0 0 0 0.262 0 map base_link 20" />
 <!--		<include file="$(find robik)/launch/robik_hectorslam.launch" /> -->
 	</group>
 
@@ -70,7 +72,7 @@
 		<include file="$(find robik_moveit_config)/launch/move_group.launch">
 			<arg name="allow_trajectory_execution" value="true"/>
 			<arg name="fake_execution" value="false"/>
-			<arg name="info" value="true"/>
+			<arg name="info" value="$(arg debug)"/>
 			<arg name="debug" value="$(arg debug)"/>
 		</include>
 
@@ -78,5 +80,6 @@
 	</group>
 
 	<node name="sound_play" pkg="sound_play" type="soundplay_node.py" respawn="true" />
+	<node name="wiimote" pkg="wiimote" type="wiimote_node.py" respawn="false" />
 
 </launch>

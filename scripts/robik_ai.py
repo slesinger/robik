@@ -78,53 +78,6 @@ def split_text(input_text, max_length=100):
                           ['([\,|\.|;]+)', '( )'])
 
 
-audio_args = namedtuple('audio_args',['language','output'])
-
-def audio_extract(input_text='',args=None):
-    # This accepts :
-    #   a dict,
-    #   an audio_args named tuple
-    #   or arg parse object
-    if args is None:
-        args = audio_args(language='en',output=open('output.mp3', 'w'))
-    if type(args) is dict:
-        args = audio_args(
-                    language=args.get('language','en'),
-                    output=open(args.get('output','output.mp3'), 'w')
-        )
-    #process input_text into chunks
-    #Google TTS only accepts up to (and including) 100 characters long texts.
-    #Split the text in segments of maximum 100 characters long.
-    combined_text = split_text(input_text)
-
-    #download chunks and write them to the output file
-    for idx, val in enumerate(combined_text):
-        mp3url = "http://translate.google.com/translate_tts?tl=%s&q=%s&total=%s&idx=%s" % (
-            args.language,
-            urllib.quote(val),
-            len(combined_text),
-            idx)
-        headers = {"Host": "translate.google.com",
-                   "Referer": "http://www.gstatic.com/translate/sound_player2.swf",
-                   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) "
-                                 "AppleWebKit/535.19 (KHTML, like Gecko) "
-                                 "Chrome/18.0.1025.163 Safari/535.19"
-        }
-        req = urllib2.Request(mp3url, '', headers)
-        sys.stdout.write('.')
-        sys.stdout.flush()
-        if len(val) > 0:
-            try:
-                response = urllib2.urlopen(req)
-                args.output.write(response.read())
-                time.sleep(.5)
-            except urllib2.URLError as e:
-                print ('%s' % e)
-    args.output.close()
-    print('Saved MP3 to %s' % args.output.name)
-
-
-
 
 
 

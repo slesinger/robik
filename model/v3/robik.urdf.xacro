@@ -210,21 +210,6 @@
 		<child link="right_wheel"/>
 	</joint>
 
-	<link name="rear_sonar_link">
-		<visual>
-			<origin xyz="-0.015 0 0" rpy="0 0 0" />
-			<geometry>
-				<box size="0.03 0.04 0.015" />
-			</geometry>
-			<material name="alum" />
-		</visual>
-	</link>
-	<joint name="rear_sonar_joint" type="fixed">
-		<parent link="base_link" />
-		<child link="rear_sonar_link" />
-		<origin xyz="-0.24 0 ${0.015 + base_above_gnd}" rpy="0 0 ${pi}" />
-	</joint>
-
 	<!-- kinect -->
 	<xacro:include filename="$(find robik)/model/v3/kinect.urdf.xacro"/>
 	<xacro:sensor_kinect parent="base_link" />
