@@ -99,11 +99,12 @@ include_directories(include
 
 ## Declare a cpp executable
 add_executable(robik_driver src/robik_driver.cpp src/robik_util.cpp)
+add_executable(robik_teleop src/robik_teleop.cpp)
 add_executable(robik_hw_ifce src/robik_hw_ifce.cpp src/robik_util.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-add_dependencies(robik_driver robik_hw_ifce robik_generate_messages_cpp)
+add_dependencies(robik_driver robik_teleop robik_hw_ifce robik_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(robik_driver
@@ -111,6 +112,10 @@ target_link_libraries(robik_driver
 #    ${OpenCV_LIBS}
 )
 target_link_libraries(robik_hw_ifce
+    ${catkin_LIBRARIES}
+)
+
+target_link_libraries(robik_teleop
     ${catkin_LIBRARIES}
 )
 
