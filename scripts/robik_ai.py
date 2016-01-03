@@ -85,7 +85,20 @@ def split_text(input_text, max_length=100):
 def say(text):
 	rospy.loginfo("I say: %s", text)
 	soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
-	#audio_extract(input_text='tunnel snakes rule apparently', args = {'language':'en','output':'/tmp/outputto.mp3'})
+
+def say_action(text):
+	rospy.loginfo("I say: %s", text)
+	soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
+
+
+def read(text):
+    f = open(text, 'r')
+    complete = ""
+    for para in f:
+        complete += para
+        #for s in split_text(para, 200):  #problem here is that reading is asynchrnous and hence second paragraph is commanded to be read right after first one starts (not finishes)
+    say_action(complete)
+
 
 def jakSeMas():
 	say("Zatížení je " + str(int(os.getloadavg()[0] * 100)) + " procent")
@@ -196,6 +209,9 @@ def recognitionCallback(data):
 
 	if token_1 == 'rekni':
 		say(tokens[1])
+
+	if token_1 == 'precti':
+		read(tokens[1])
 
         if token_1 == 'menu':
                 menu(tokens[1])

@@ -87,17 +87,17 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 
 	//advertise topics to arduino
-	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 100);
+	pub_generic_control = n.advertise<robik::GenericControl>("robik_generic_control", 10);
 
-	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
+	ros::Subscriber sub_status = n.subscribe("robik_status", 10, statusCallback);
 
 	//advertise driver services
 	ros::ServiceServer service_setParkingPhase = n.advertiseService("setParkingPhase", setParkingPhase);
 
 	//advertise topics from driver
-	pub_laser = n.advertise<sensor_msgs::LaserScan>("laser_data", 100);
-	pub_lidar = n.advertise<sensor_msgs::LaserScan>("lidar_data", 100);
-	pub_ai = n.advertise<std_msgs::String>("robik_ai", 100);
+	pub_laser = n.advertise<sensor_msgs::LaserScan>("laser_data", 10);
+	pub_lidar = n.advertise<sensor_msgs::LaserScan>("lidar_data", 10);
+	pub_ai = n.advertise<std_msgs::String>("robik_ai", 10);
 
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko
 

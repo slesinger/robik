@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle n;
 	RobikControllers& robik_controllers = RobikControllers::get_instance();
 	robik_controllers.init();
-	init_arm_control_message();
+	init_m_control_message();
 	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);
 	pub_velocity_control = n.advertise<robik::VelocityControl>("robik_velocity_control", 100);
 
