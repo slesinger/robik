@@ -5,7 +5,7 @@
 	<arg name="robot_connected" value="$(env CONNECTED)" />
 	<arg name="ros_workspace" value="/home/honza/workspace" />
 	<arg name="debug" default="false" />
-	<arg name="moveit" default="true" />
+	<arg name="moveit" default="false" />
 	<arg name="db" default="true" />
 	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find robik)/model/v3/robik.urdf.xacro" />
 
@@ -24,23 +24,29 @@
 
 
 	<group if="$(arg robot_connected)">
-		<!--<node name="rosserial_node" pkg="rosserial_python" type="serial_node.py"
-			args="/dev/ttyACM0" respawn="true">
-			<param name="baud" value="500000"/>
-		</node>-->
+
+		<node pkg="xv_11_laser_driver" type="neato_laser_publisher" name="neato_laser_publisher">
+		  <param name="~port" value="/dev/ttyUSB0" />
+		  <param name="~frame_id" value="/base_scan_link" />
+		  <param name="~firmware_version" value="2" />
+		  <remap from="scan" to="/base_scan/scan" />
+		</node>
 
 		<node name="rosserial_node" pkg="rosserial_server" type="serial_node">
-			<rosparam>
-                           port: /dev/ttyACM0
-                           baud: 500000
-                        </rosparam>
+		  <rosparam>
+                    port: /dev/ttyACM0
+                    baud: 500000
+                  </rosparam>
 		</node>
+
 		<node pkg="rosserial_python" type="message_info_service.py" name="rosserial_message_info" />
 	</group>
 
 	<group unless="$(arg robot_connected)">
-		<node name="rosserial_node" pkg="robik" type="arduino_dummy.py">
-		</node>
+		<node name="rosserial_node" pkg="robik" type="arduino_dummy.py" />
+
+		<!-- This node is to enable map link to emaulate world coordinate while SLAM is disabled -->
+		<node pkg="tf" type="static_transform_publisher" name="map_to_base_broadcaster" args="0 0 0 0 0 0 map base_link 20" />
 
 		<!-- joints of arm is published by driver -->
 		<!--<param name="use_gui" value="true" />
@@ -55,20 +61,12 @@
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
 
 	<group if="$(arg robot_connected)">
-
 		<include file="$(find openni_launch)/launch/openni.launch" />
-		<node name="depthimage_to_laserscan" pkg="depthimage_to_laserscan" type="depthimage_to_laserscan">
-			<param name="output_frame_id" value="base_scan_link" />
-			<remap from="image" to="/camera/depth/image_raw" />
-			<remap from="scan" to="/base_scan/scan" />
-		</node>
-
-		<!-- This node is to enable map link to emaulate world coordinate while SLAM is disabled -->
-		<node pkg="tf" type="static_transform_publisher" name="map_to_base_broadcaster" args="0 0 0 0 0.262 0 map base_link 20" />
-<!--		<include file="$(find robik)/launch/robik_hectorslam.launch" /> -->
+		<include file="$(find robik)/launch/robik_hectorslam.launch" />
 	</group>
 
 	<node name="robik_ai" pkg="robik" type="robik_ai.py" />
+
 
 	<!-- Run the main MoveIt executable -->
 	<group if="$(arg moveit)">

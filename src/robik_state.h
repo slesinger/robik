@@ -1,1 +1,0 @@
-/home/honza/sketchbook/robik_arduino/robik_state.h
