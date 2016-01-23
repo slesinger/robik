@@ -15,6 +15,8 @@
 	<node name="robik_teleop" pkg="robik" type="robik_teleop" output="screen" />
 	<node name="robik_hw_ifce" pkg="robik" type="robik_hw_ifce" output="screen" />
 
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+
 	<!-- Start joint trajectory action controller -->
 	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/joint_trajectory_controllers.yaml" />
 	<rosparam command="load" file="$(find robik)/launch/robik_controllers_config/joint_state_controller.yaml" />
@@ -49,20 +51,18 @@
 		<node pkg="tf" type="static_transform_publisher" name="map_to_base_broadcaster" args="0 0 0 0 0 0 map base_link 20" />
 
 		<!-- joints of arm is published by driver -->
-		<!--<param name="use_gui" value="true" />
+		<param name="use_gui" value="true" />
 		<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-		-->
+		
 
 		<param name="use_sim_time" value="true" />
 		<node name="bagplayer" pkg="rosbag" type="play" output="screen" args="--clock -l $(arg ros_workspace)/src/robik/bags/nav.bag">
 		</node>
 	</group>
 
-	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
-
 	<group if="$(arg robot_connected)">
 		<include file="$(find openni_launch)/launch/openni.launch" />
-		<include file="$(find robik)/launch/robik_hectorslam.launch" />
+		<include file="$(find robik)/launch/robik_slam.launch" />
 	</group>
 
 	<node name="robik_ai" pkg="robik" type="robik_ai.py" />

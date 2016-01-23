@@ -10,8 +10,8 @@ mobile_base_controller:
   cmd_vel_timeout: 0.25
 
   # Base frame_id
-  base_frame_id: base_link_ifce
-  enable_odom_tf: false
+  base_frame_id: base_link
+  enable_odom_tf: true
 
 # Wheel separation and diameter. These are both optional.
   # diff_drive_controller will attempt to read either one or both from the

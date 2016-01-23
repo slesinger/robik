@@ -1,12 +1,12 @@
 <launch>
 
-  <arg name="geotiff_map_file_path" default="$(find robik)/maps"/>
-
-  <include file="$(find robik)/launch/mapping_default.launch"/>
+  <arg name="map_file_path" default="$(find robik)/maps"/>
+  <include file="$(find robik)/launch/hector_mapping.launch"/>
 
   <include file="$(find hector_geotiff)/launch/geotiff_mapper.launch">
     <arg name="trajectory_source_frame_name" value="scanmatcher_frame"/>
-    <arg name="map_file_path" value="$(arg geotiff_map_file_path)"/>
+    <arg name="map_file_path" value="$(arg map_file_path)"/>
+    <arg name="geotiff_save_period" value="30" />
   </include>
 
 </launch>

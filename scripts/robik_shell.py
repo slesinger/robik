@@ -46,6 +46,18 @@ class RobikShell(cmd.Cmd):
     	self.pub.publish("precti %s" % text)
     	ans(OK)
 
+    #Uloz mapu
+    def do_uloz_mapu(self, text):
+    	"Uloz aktualni mapu v map_serveru do <robik>/maps. Parametr nazev mapy"
+    	call(["rosrun", "map_server" ,"map_saver" ,"-f" ,"/home/honza/workspace/src/robik/maps/%s" % text])
+    	ans(OK)
+
+    #Log
+    def do_log(self, text):
+	"Vypisuj aktualni log soubor"
+	call(["tail" ,"-f", "/tmp/robik.log"])
+	ans(OK)
+
     OPERATION_HEAD_POSE= 1
     OPERATION_SET_PARKING_PHASE= 2
     OPERATION_SET_LED= 3
