@@ -43,6 +43,9 @@ void wiimoteStateCallback(const wiimote::State& msg) {
   bool cmdvel = false;
   int fwd = 1;
 
+  cmdvel_msg.linear.x = 0;
+  cmdvel_msg.angular.z = 0;
+
   if (msg.buttons[msg.MSG_BTN_LEFT]) {  //UP
     cmdvel_msg.linear.x = MOVE_LINEAR_SPEED;
     cmdvel_msg.angular.z = 0;

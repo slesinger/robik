@@ -40,21 +40,31 @@ class RobikShell(cmd.Cmd):
     	self.pub.publish("rekni %s" % text)
     	ans(OK)
     
+    def do_say(self, text):
+    	"Voice output"
+    	self.pub.publish("say %s" % text)
+    	ans(OK)
+    
     #Precti
     def do_precti(self, text):
-    	"Precti text ulozeny v UTF-8 souboru na lokalnim disku Robika"
+    	"Precti cesky text ulozeny v UTF-8 souboru na lokalnim disku Robika"
     	self.pub.publish("precti %s" % text)
     	ans(OK)
 
+    def do_read(self, text):
+    	"Read english text file stored on Robik's filesystem"
+    	self.pub.publish("read %s" % text)
+    	ans(OK)
+
     #Uloz mapu
-    def do_uloz_mapu(self, text):
-    	"Uloz aktualni mapu v map_serveru do <robik>/maps. Parametr nazev mapy"
+    def do_save_map(self, text):
+    	"Save current map in map_server to <robik>/maps. Give map name as parameter"
     	call(["rosrun", "map_server" ,"map_saver" ,"-f" ,"/home/honza/workspace/src/robik/maps/%s" % text])
     	ans(OK)
 
     #Log
     def do_log(self, text):
-	"Vypisuj aktualni log soubor"
+	"Output latest log file"
 	call(["tail" ,"-f", "/tmp/robik.log"])
 	ans(OK)
 
@@ -65,16 +75,16 @@ class RobikShell(cmd.Cmd):
     OPERATION_SET_ARMPOWER= 5
 
     #zapni/vypni
-    def do_zapni(self, text):
-        "Zapni napajeni ruky"
+    def do_enable(self, text):
+        "Enable someting"
         op = None
-        if text == "ruku":
+        if text == "arm":
             op = self.OPERATION_SET_ARMPOWER
-        elif text == "svetlo":
+        elif text == "light":
             op = self.OPERATION_SET_LED
 
         if op == None:
-            ans("Co chces zapnout?")
+            ans("What do you want to enable? arm light")
         else:
             genctrl_msg = GenericControl()
             genctrl_msg.gen_operation = op
@@ -82,16 +92,16 @@ class RobikShell(cmd.Cmd):
             self.pub_genctrl.publish(genctrl_msg)
             ans(OK)
 
-    def do_vypni(self, text):
-        "Vypni napajeni ruky"
+    def do_disable(self, text):
+        "Disable something"
         op = None
-        if text == "ruku":
+        if text == "arm":
             op = self.OPERATION_SET_ARMPOWER
-        elif text == "svetlo":
+        elif text == "light":
             op = self.OPERATION_SET_LED
 
         if op == None:
-            ans("Co chces vypnout?")
+            ans("What do you want to disable?")
         else:
             genctrl_msg = GenericControl()
             genctrl_msg.gen_operation = op
@@ -99,12 +109,10 @@ class RobikShell(cmd.Cmd):
             self.pub_genctrl.publish(genctrl_msg)
             ans(OK)
 
-    def complete_zapni(self, text, line, begidx, endidx):
-        print line
-        print begidx
-        print endidx
-        if text.startswith("s", 0, 1): print "svetlo"
-        if text.startswith("r", 0, 1): print "ruku"
+    def complete_enable(self, text, line, begidx, endidx):
+        if text == "": print "arm light"
+        if text.startswith("l", 0, 1): print "light"
+        if text.startswith("a", 0, 1): print "arm"
 
     #pokus s mluvenim pomoci action serveru
     def do_x(self, text):
@@ -113,7 +121,7 @@ class RobikShell(cmd.Cmd):
         goal = SoundRequestGoal()
         goal.sound_request.sound = SoundRequest.SAY
         goal.sound_request.command = SoundRequest.PLAY_ONCE
-        goal.sound_request.arg = "To ti ale dalo zabrat co?"
+        goal.sound_request.arg = "Blah blah I am saying something"
         client.send_goal(goal)
         print "Goal sent"
         client.wait_for_result()
@@ -121,28 +129,53 @@ class RobikShell(cmd.Cmd):
 
     #General AI command
     def do_ai(self, text):
-        "Obecny prikaz pro Robik AI, ktery neni podporovany timto shellem. Syntax: ai <prikaz>. Napr: ai rekni Kuba jede na kole"
+        "Give a general command to Robik AI that is not supported by this shell. Syntax: ai <command>. E.g.: ai rekni Kuba jede na kole"
         self.pub.publish(text)
 
 
     #Connect Wiimote
+    def do_wii(self, line):
+        "For wii remote connection press red button inside the controller and run wiimote command in this shell."
+	do_wiimote(self, line)
+
     def do_wiimote(self, line):
-        "Pro pripojeni Wiimote ovladace, stiskni cervene tlacitko pod krytem baterie a spust prikaz wiimote"
+        "For wii remote connection press red button inside the controller and run wiimote command in this shell."
         node = roslaunch.core.Node("wiimote", "wiimote_node.py")
         launch = roslaunch.scriptapi.ROSLaunch()
         launch.start()
 
         process = launch.launch(node)
         ans(process.is_alive())
-    
+
+
+    #Arm related stuff
+    def do_arm(self, text):
+        "Execute arm movements. Use arm goal name as parameter. Goals are defined in this shell temporarily."
+
+	if not text == "":
+            self.pub.publish("arm " + text)
+        else:
+            ans("Give me goal name for the arm.")
+
+    def complete_arm(self, text, line, begidx, endidx):
+        if text == "": print "home open close grab handover up "
+        if text.startswith("ho",0, 2): print "home"
+        if text.startswith("o", 0, 1): print "open"
+        if text.startswith("c", 0, 1): print "close"
+        if text.startswith("g", 0, 1): print "grab"
+        if text.startswith("ha",0, 2): print "handover"
+        if text.startswith("u", 0, 1): print "up"
+
+
     #Cheat Sheet
     CASTE = [
     	'rekni Kuba jede na kole a vesele si zpiva',
-    	'zapni svetlo'
+	'say Better safe than sorry',
+    	'enable light'
     ]
     
-    def do_caste(self, line):
-    	"Seznam casto uzitych prikazu"
+    def do_quickref(self, line):
+    	"Frequently used commands:"
     	if line:
     		try:
     			i = int(line)
@@ -156,11 +189,11 @@ class RobikShell(cmd.Cmd):
 	    	for c in self.CASTE:
     			print str(self.CASTE.index(c)) + ' ' + c
     
-    def do_konec(self, line):
-        "Ukoncit tuto konzoli"
+    def do_quit(self, line):
+        "Exit from this shell"
         return True
     def do_EOF(self, line):
-        "Ukoncit tuto konzoli"
+        "Exit this shell"
         return True
 
 

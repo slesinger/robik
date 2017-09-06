@@ -16,6 +16,8 @@ ros::Publisher pub_arm_control;
 robik::VelocityControl velocity_control_msg;   //message to be send to arduino, reusing memory
 ros::Publisher pub_velocity_control;
 
+t_parm yaw_parm, shoulder_parm, elbow_parm, roll_parm, clamp_parm;
+
 void init_arm_control_message() {
 	arm_control_msg.header.frame_id = "base_link";
 	arm_control_msg.header.stamp = ros::Time::now();
@@ -34,7 +36,52 @@ void statusCallback(const robik::GenericStatus& msg) {
 }
 
 
-void RobikControllers::init() { 
+void RobikControllers::init() {
+
+    yaw_parm.fromLow = ARM_RES_MIN_YAW;
+    yaw_parm.fromHigh = ARM_RES_MAX_YAW;
+    yaw_parm.toLow = ARM_DEG_MIN_YAW;
+    yaw_parm.toHigh = ARM_DEG_MAX_YAW;
+    yaw_parm.threshold = ARM_DEG_THLD;
+    yaw_parm.outlier_cnt = 0;
+    yaw_parm.outlier_cnt_max = ARM_OUTL_CNT_MAX;
+    yaw_parm.avg1, yaw_parm.avg2, yaw_parm.avg3 = 0;
+
+    shoulder_parm.fromLow = ARM_RES_MIN_SHOULDER;
+    shoulder_parm.fromHigh = ARM_RES_MAX_SHOULDER;
+    shoulder_parm.toLow = ARM_DEG_MIN_SHOULDER;
+    shoulder_parm.toHigh = ARM_DEG_MAX_SHOULDER;
+    shoulder_parm.threshold = ARM_DEG_THLD;
+    shoulder_parm.outlier_cnt = 0;
+    shoulder_parm.outlier_cnt_max = ARM_OUTL_CNT_MAX;
+    shoulder_parm.avg1, shoulder_parm.avg2, shoulder_parm.avg3 = 0;
+
+    elbow_parm.fromLow = ARM_RES_MIN_ELBOW;
+    elbow_parm.fromHigh = ARM_RES_MAX_ELBOW;
+    elbow_parm.toLow = ARM_DEG_MIN_ELBOW;
+    elbow_parm.toHigh = ARM_DEG_MAX_ELBOW;
+    elbow_parm.threshold = ARM_DEG_THLD;
+    elbow_parm.outlier_cnt = 0;
+    elbow_parm.outlier_cnt_max = ARM_OUTL_CNT_MAX;
+    elbow_parm.avg1, elbow_parm.avg2, elbow_parm.avg3 = 0;
+
+    roll_parm.fromLow = ARM_RES_MIN_ROLL;
+    roll_parm.fromHigh = ARM_RES_MAX_ROLL;
+    roll_parm.toLow = ARM_DEG_MIN_ROLL;
+    roll_parm.toHigh = ARM_DEG_MAX_ROLL;
+    roll_parm.threshold = ARM_DEG_THLD;
+    roll_parm.outlier_cnt = 0;
+    roll_parm.outlier_cnt_max = ARM_OUTL_CNT_MAX;
+    roll_parm.avg1, roll_parm.avg2, roll_parm.avg3 = 0;
+
+    clamp_parm.fromLow = ARM_RES_MIN_CLAMP;
+    clamp_parm.fromHigh = ARM_RES_MAX_CLAMP;
+    clamp_parm.toLow = ARM_DEG_MIN_CLAMP;
+    clamp_parm.toHigh = ARM_DEG_MAX_CLAMP;
+    clamp_parm.threshold = ARM_DEG_THLD;
+    clamp_parm.outlier_cnt = 0;
+    clamp_parm.outlier_cnt_max = ARM_OUTL_CNT_MAX;
+    clamp_parm.avg1, clamp_parm.avg2, clamp_parm.avg3 = 0;
 
    // connect and register the joint state interface
    hardware_interface::JointStateHandle state_handle_yaw("yaw_joint", &pos[0], &vel[0], &eff[0]);
@@ -88,13 +135,14 @@ void RobikControllers::read_from_hw (const robik::GenericStatus& msg) {
 
 	//Arm joint state
 	if (msg.arm_enabled == 1) {
-		pos[0] = map_check_inf(msg.arm_yaw, ARM_RES_MIN_YAW, ARM_RES_MAX_YAW, ARM_DEG_MIN_YAW, ARM_DEG_MAX_YAW) * DEG_TO_RAD;
-		pos[1] = map_check_inf(msg.arm_shoulder, ARM_RES_MIN_SHOULDER, ARM_RES_MAX_SHOULDER, ARM_DEG_MIN_SHOULDER, ARM_DEG_MAX_SHOULDER) * DEG_TO_RAD;
-		pos[2] = map_check_inf(msg.arm_elbow, ARM_RES_MIN_ELBOW, ARM_RES_MAX_ELBOW, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW) * DEG_TO_RAD;
-		pos[3] = map_check_inf(msg.arm_roll, ARM_RES_MIN_ROLL, ARM_RES_MAX_ROLL, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL) * DEG_TO_RAD;
-		pos[4] = map_check_inf(msg.arm_clamp, ARM_RES_MIN_CLAMP, ARM_RES_MAX_CLAMP, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP) * DEG_TO_RAD;
+		pos[0] = map_avgcheck_inf(msg.arm_yaw, &yaw_parm) * DEG_TO_RAD;
+		pos[1] = map_avgcheck_inf(msg.arm_shoulder, &shoulder_parm) * DEG_TO_RAD;
+		pos[2] = map_avgcheck_inf(msg.arm_elbow, &elbow_parm) * DEG_TO_RAD;
+		pos[3] = map_avgcheck_inf(msg.arm_roll, &roll_parm) * DEG_TO_RAD;
+		pos[4] = map_avgcheck_inf(msg.arm_clamp, &clamp_parm) * DEG_TO_RAD;
 	}
-	//ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
+	if (pos[0] == 0)
+		ROS_INFO("sub arm_control %f %f %f %f %f", pos[0],pos[1],pos[2],pos[3],pos[4]);
 
 	//IMU
 	imu_orientation[0] = msg.imu_compass_v3_x;
@@ -127,7 +175,7 @@ void RobikControllers::write_to_hw(){
 	arm_control_msg.arm_elbow = (unsigned int) map_unchecked(cmd[2] * RAD_TO_DEG, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW, ARM_MIN_ELBOW, ARM_MAX_ELBOW);
 	arm_control_msg.arm_roll = (unsigned int) map_unchecked(cmd[3] * RAD_TO_DEG, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
 	arm_control_msg.arm_clamp = (unsigned int) map_unchecked(cmd[4] * RAD_TO_DEG, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
-	arm_control_msg.time_to_complete = 50; //20Hz in milliseconds, this is frequency of /robik_arm_control
+	arm_control_msg.time_to_complete = 50; //50ms ~ 20Hz in milliseconds, this is frequency of /robik_arm_control
 
 //	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
@@ -185,7 +233,7 @@ int main(int argc, char **argv) {
 		}
 		cm.update(robik_controllers.get_time(), robik_controllers.get_period());
 		if (initialized) robik_controllers.write_to_hw();
-		nanosleep((const struct timespec[]){{0, 50000000L}}, NULL); //50ms
+		nanosleep((const struct timespec[]){{0, 50000000L}}, NULL); //50ms ~ 20Hz
 		ros::spinOnce(); //in case of issue with not responding on commands, try to remove this but statusCallBack will not be called anymore
 	}
 	return 0;

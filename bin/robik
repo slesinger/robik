@@ -1,7 +1,7 @@
 #!/bin/bash
 
 robot_host="robik"
-source /opt/ros/jade/setup.bash
+source /opt/ros/indigo/setup.bash
 source /home/honza/workspace/devel/setup.bash
 
 

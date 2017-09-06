@@ -8,6 +8,9 @@
 
 #include "robik/GenericStatus.h"
 
+#define ARM_DEG_THLD 20
+#define ARM_OUTL_CNT_MAX 5
+
 class RobikControllers : public hardware_interface::RobotHW {
 public:
 	static RobikControllers& get_instance() {

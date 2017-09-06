@@ -25,6 +25,24 @@ import sys
 import time
 import re
 from collections import namedtuple
+import moveit_msgs.msg
+import moveit_commander
+import json
+from watson_developer_cloud import ConversationV1
+
+
+conversation = ConversationV1(
+    username='d3ffcc1b-14bd-4ac7-a8e6-d3d9ea21cad7',
+    password='MnAHpjMePuWu',
+    version='2017-08-17')
+
+workspace_id = '6667875c-eca9-4568-85c7-8fd88a5487d9'
+
+response = conversation.message(
+    workspace_id=workspace_id,
+    message_input={'text': ''})
+context = response['context']
+
 
 def split_text(input_text, max_length=100):
     """
@@ -82,22 +100,28 @@ def split_text(input_text, max_length=100):
 
 
 
-def say(text):
+def say(text, lang='en'):
+	rospy.loginfo("I say ({}): %s".format(lang), text)
+	if lang == 'cs':
+		soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
+	else:
+		soundhandle.say(text)
+
+def say_action(text, lang='en'):
 	rospy.loginfo("I say: %s", text)
-	soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
+	if lang == 'cs':
+		soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
+	else:
+		soundhandle.say(text)
 
-def say_action(text):
-	rospy.loginfo("I say: %s", text)
-	soundhandle.say(text.decode('utf8').encode('iso-8859-2'), "voice_czech_ph")
 
-
-def read(text):
+def read(text, lang='en'):
     f = open(text, 'r')
     complete = ""
     for para in f:
         complete += para
         #for s in split_text(para, 200):  #problem here is that reading is asynchrnous and hence second paragraph is commanded to be read right after first one starts (not finishes)
-    say_action(complete)
+    say_action(complete, lang)
 
 
 def jakSeMas():
@@ -128,6 +152,130 @@ def prepniSit(sit):
 	say("Počkej chvilku")
 	time.sleep(5)
 	jakSeMas()
+
+#Arm
+def handleArm(text):
+  global arm
+  global moveit_commander
+
+  if text == "home":
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("home")
+    arm.plan()
+    arm.go()
+  elif text == "open":
+    arm = moveit_commander.MoveGroupCommander("gripper")
+    arm.set_named_target("open")
+    arm.plan()
+    arm.go()
+  elif text == "close":
+    arm = moveit_commander.MoveGroupCommander("gripper")
+    arm.set_named_target("close")
+    arm.plan()
+    arm.go()
+  elif text == "state":
+    print arm.get_current_state()
+  elif text == "grab":
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("inbowl1")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("gripper")
+    arm.set_named_target("open")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("inbowl2")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("inbowl3")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("inbowl4")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("gripper")
+    arm.set_named_target("close")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm.set_named_target("close")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("inbowl1")
+    arm.plan()
+    arm.go()
+    rospy.sleep(2)
+    arm.set_named_target("handover")
+    arm.plan()
+    arm.go()
+    say("say Get ready to take the sweets")
+    rospy.sleep(2)
+    arm = moveit_commander.MoveGroupCommander("gripper")
+    arm.set_named_target("open")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm.set_named_target("close")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("home")
+    arm.plan()
+    arm.go()
+  elif text == "wave":
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_named_target("waveleft")
+    arm.plan()
+    arm.go()
+    say("say Bye Bye. Have fun and get back to us soon.")
+    rospy.sleep(1)
+    arm.set_named_target("waveright")
+    arm.plan()
+    arm.go()
+    arm.set_named_target("waveleft")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm.set_named_target("waveright")
+    arm.plan()
+    arm.go()
+    rospy.sleep(1)
+    arm.set_named_target("home")
+    arm.plan()
+    arm.go()
+	
+
+def handle_speech(text):
+    global context
+
+    print "USER  < {}".format(text.data)
+    response = conversation.message(
+        workspace_id=workspace_id,
+        message_input={'text': text.data},
+        context=context)
+
+    context = response['context']
+    for rl in response['output']['text']:
+	tokens = rl.split('}}')
+	for t in tokens:
+		if t.startswith('{{'):
+			msg = new 
+			msg.data = std_msgs.msg.String(t[2:])
+			recognitionCallback(msg)
+		else:
+        		say(rl)
+
 
 #Menu
 menu_items = {1:(4,2,"Jak se máš", jakSeMas),
@@ -195,33 +343,30 @@ def recognitionCallback(data):
 	if token_1 == 'map':
 		print "action map"
 		
-	if token_1 == 'zvedni':
+	elif token_1 == 'zvedni':
 		print "zvedni"
 		
-	if token_1 == 'poloz':
+	elif token_1 == 'poloz':
 		print "poloz"
 
-	if token_1 == 'zaparkuj ruku':
-		zaparkuj_ruku()
+	elif token_1 == 'rekni':
+		say(tokens[1], lang='cs')
 
-	if token_1 == 'zaparkuj se':
-		zaparkuj_ruku()
-
-	if token_1 == 'rekni':
+	elif token_1 == 'say':
 		say(tokens[1])
 
-	if token_1 == 'precti':
+	elif token_1 == 'precti':
+		read(tokens[1], lang='cs')
+
+	elif token_1 == 'read':
 		read(tokens[1])
 
-        if token_1 == 'menu':
+        elif token_1 == 'menu':
                 menu(tokens[1])
-		
-def zaparkuj_ruku():
-	client = actionlib.SimpleActionClient('robik_action_arm', robik.msg.armAction)
-	client.wait_for_server()
-	goal = robik.msg.armGoal(command=1, opTimeMs=1000)
-	client.send_goal(goal)
-	client.wait_for_result(rospy.Duration.from_sec(5.0))
+
+        elif token_1 == 'arm':
+                handleArm(tokens[1])
+	
 
 def zaparkuj_se():
 	client = actionlib.SimpleActionClient('robik_action_move', robik.msg.moveAction)
@@ -239,12 +384,11 @@ def nabij_se():
 	client.wait_for_result(rospy.Duration.from_sec(5.0))
 
 def shut_down(poweroff):
-	zaparkuj_ruku()
 	if poweroff == True:
 		vypniSe()
 
 def bored():
-	say('S lidma je nuda. Postavte mi ještě kamaráda')
+	say('Hallo. I am getting real bored. Please create me some new friend.')
 
 def seNudim(event):
 	from random import choice
@@ -259,7 +403,13 @@ def AI():
 	rospy.loginfo("Starting AI.")
 	rospy.init_node('robik_ai');
 	rospy.Subscriber("robik_ai", String, recognitionCallback)
-	say("vždy k službám")
+	rospy.Subscriber("/gspeech/speech", String, handle_speech)
+	moveit_cmd = moveit_commander.RobotCommander()
+    	moveit_scene = moveit_commander.PlanningSceneInterface()
+    	moveit_display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path', moveit_msgs.msg.DisplayTrajectory, queue_size=5)
+
+
+	say("ehm. ehm. My dear master. Robik is ready at your service.")
 
 	rospy.Timer(rospy.Duration(3000), seNudim)
 
@@ -267,7 +417,6 @@ def AI():
 
 def signal_handler(signal, frame):
 	rospy.loginfo('AI shutdown')
-	zaparkuj_ruku()
 	time.sleep(3)
 	rospy.loginfo('AI shutdown completed or timeout')
 
