@@ -176,6 +176,7 @@ def handleArm(text):
   elif text == "state":
     print arm.get_current_state()
   elif text == "grab":
+    say("OK. I will give you some sweets.")
     arm = moveit_commander.MoveGroupCommander("arm")
     arm.set_named_target("inbowl1")
     arm.plan()
@@ -218,7 +219,7 @@ def handleArm(text):
     arm.set_named_target("handover")
     arm.plan()
     arm.go()
-    say("say Get ready to take the sweets")
+    say("Get ready to take the sweets")
     rospy.sleep(2)
     arm = moveit_commander.MoveGroupCommander("gripper")
     arm.set_named_target("open")
@@ -238,7 +239,7 @@ def handleArm(text):
     arm.set_named_target("waveleft")
     arm.plan()
     arm.go()
-    say("say Bye Bye. Have fun and get back to us soon.")
+    say("Bye Bye. Have fun and get back to us soon.")
     rospy.sleep(1)
     arm.set_named_target("waveright")
     arm.plan()
@@ -267,12 +268,12 @@ def handle_speech(text):
 
     context = response['context']
     for rl in response['output']['text']:
+	m = re.search('{{.*}}', rl)
+	cmd = m.group(0)
 	tokens = rl.split('}}')
 	for t in tokens:
 		if t.startswith('{{'):
-			msg = new 
-			msg.data = std_msgs.msg.String(t[2:])
-			recognitionCallback(msg)
+			handleCommand(t[2:])
 		else:
         		say(rl)
 
@@ -335,9 +336,12 @@ def menu(button):
 			menu_say(menu_current)
 
 def recognitionCallback(data):
-	rospy.loginfo("I heard %s",data.data)
+	handleCommand(data.data)
+
+def handleCommand(cmd):
+	rospy.loginfo("AI command %s", cmd)
 	
-	tokens = data.data.split(" ", 1)
+	tokens = cmd.split(" ", 1)
 	token_1 = tokens[0]
 
 	if token_1 == 'map':
@@ -409,11 +413,15 @@ def AI():
     	moveit_display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path', moveit_msgs.msg.DisplayTrajectory, queue_size=5)
 
 
-	say("ehm. ehm. My dear master. Robik is ready at your service.")
+	say("ehm. ehm. Robik is ready at your service.")
 
 	rospy.Timer(rospy.Duration(3000), seNudim)
 
 	rospy.spin()
+
+	time.sleep(2)
+	handleCommand("arm home")
+
 
 def signal_handler(signal, frame):
 	rospy.loginfo('AI shutdown')

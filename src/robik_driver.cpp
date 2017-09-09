@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 //	ros::Subscriber sub_head = n.subscribe("head_twist", 10, headCallback); //TODO add camera oko
 
 //ros::spin();
-	ros::Rate loop_rate(20);
+	ros::Rate loop_rate(10);
 
 	while (ros::ok()) {
 		ros::spinOnce();

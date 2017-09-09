@@ -175,7 +175,7 @@ void RobikControllers::write_to_hw(){
 	arm_control_msg.arm_elbow = (unsigned int) map_unchecked(cmd[2] * RAD_TO_DEG, ARM_DEG_MIN_ELBOW, ARM_DEG_MAX_ELBOW, ARM_MIN_ELBOW, ARM_MAX_ELBOW);
 	arm_control_msg.arm_roll = (unsigned int) map_unchecked(cmd[3] * RAD_TO_DEG, ARM_DEG_MIN_ROLL, ARM_DEG_MAX_ROLL, ARM_MIN_ROLL, ARM_MAX_ROLL);
 	arm_control_msg.arm_clamp = (unsigned int) map_unchecked(cmd[4] * RAD_TO_DEG, ARM_DEG_MIN_CLAMP, ARM_DEG_MAX_CLAMP, ARM_MIN_CLAMP, ARM_MAX_CLAMP);
-	arm_control_msg.time_to_complete = 50; //50ms ~ 20Hz in milliseconds, this is frequency of /robik_arm_control
+	arm_control_msg.time_to_complete = 5; //50ms ~ 20Hz in milliseconds, this is frequency of /robik_arm_control
 
 //	ROS_INFO("pub arm_control %f %f %f %f %f", cmd[0],cmd[1],cmd[2],cmd[3],cmd[4]);
 //	ROS_INFO("pub arm_control %u %u %u %u", arm_control_msg.arm_yaw, arm_control_msg.arm_shoulder, arm_control_msg.arm_elbow, arm_control_msg.arm_roll);
@@ -207,10 +207,10 @@ int main(int argc, char **argv) {
 	RobikControllers& robik_controllers = RobikControllers::get_instance();
 	robik_controllers.init();
 	init_arm_control_message();
-	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 100);
-	pub_velocity_control = n.advertise<robik::VelocityControl>("robik_velocity_control", 100);
+	pub_arm_control = n.advertise<robik::ArmControl>("robik_arm_control", 20);
+	pub_velocity_control = n.advertise<robik::VelocityControl>("robik_velocity_control", 20);
 
-	ros::Subscriber sub_status = n.subscribe("robik_status", 1000, statusCallback);
+	ros::Subscriber sub_status = n.subscribe("robik_status", 100, statusCallback);
 
 
 	ros::CallbackQueue my_callback_queue;
@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
 		}
 		cm.update(robik_controllers.get_time(), robik_controllers.get_period());
 		if (initialized) robik_controllers.write_to_hw();
-		nanosleep((const struct timespec[]){{0, 50000000L}}, NULL); //50ms ~ 20Hz
+		nanosleep((const struct timespec[]){{0, 100000000L}}, NULL); //50ms ~ 20Hz
 		ros::spinOnce(); //in case of issue with not responding on commands, try to remove this but statusCallBack will not be called anymore
 	}
 	return 0;
