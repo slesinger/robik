@@ -255,7 +255,7 @@ def handleArm(text):
     arm.set_named_target("home")
     arm.plan()
     arm.go()
-	
+
 
 def handle_speech(text):
     global context
@@ -268,14 +268,12 @@ def handle_speech(text):
 
     context = response['context']
     for rl in response['output']['text']:
-	m = re.search('{{.*}}', rl)
-	cmd = m.group(0)
-	tokens = rl.split('}}')
-	for t in tokens:
-		if t.startswith('{{'):
-			handleCommand(t[2:])
-		else:
-        		say(rl)
+		tokens = rl.split('|')
+		for t in tokens:
+			if t.startswith('{'):
+				handleCommand(t[1:-1])
+			else:
+				say(rl)
 
 
 #Menu
@@ -340,16 +338,16 @@ def recognitionCallback(data):
 
 def handleCommand(cmd):
 	rospy.loginfo("AI command %s", cmd)
-	
+
 	tokens = cmd.split(" ", 1)
 	token_1 = tokens[0]
 
 	if token_1 == 'map':
 		print "action map"
-		
+
 	elif token_1 == 'zvedni':
 		print "zvedni"
-		
+
 	elif token_1 == 'poloz':
 		print "poloz"
 
@@ -370,7 +368,7 @@ def handleCommand(cmd):
 
         elif token_1 == 'arm':
                 handleArm(tokens[1])
-	
+
 
 def zaparkuj_se():
 	client = actionlib.SimpleActionClient('robik_action_move', robik.msg.moveAction)
@@ -434,4 +432,3 @@ if __name__ == '__main__':
 		AI()
 	except rospy.ROSInterruptException:
 		pass
-
