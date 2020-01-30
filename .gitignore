@@ -36,9 +36,11 @@
 *.cfgc
 *.txt.user*
 *-build/
+.catkin_workspace
 cpp/
 bin/
 build/
+devel/
 msg_gen/
 srv_gen/
 docs/
