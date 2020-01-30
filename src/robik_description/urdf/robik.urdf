@@ -23,7 +23,7 @@
     <visual name="base">
       <origin rpy="0 0 0" xyz="0 0 0.065"/>
       <geometry>
-        <mesh filename="package://robik/model/v3/meshes/base-binary.stl" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://robik/src/robik_description/meshes/base-binary.stl" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="clear_plastic"/>
     </visual>
