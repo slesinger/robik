@@ -28,7 +28,7 @@
 		<color rgba="1 0.81 0.4 1" />
 	</material>
 	<material name="jetson">
-		<texture filename="package://robik/model/v3/textures/jetson.jpg" />
+		<texture filename="package://robik_description/materials/jetson.jpg" />
 	</material>
 
 	<!-- base -->
@@ -36,7 +36,7 @@
 		<visual name="base">
 			<origin xyz="0 0 ${base_above_gnd}" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://robik/model/v3/meshes/base-binary.stl" scale="1.0 1.0 1.0" />
+				<mesh filename="package://robik_description/meshes/base-binary.stl" scale="1.0 1.0 1.0" />
 			</geometry>
 			<material name="clear_plastic" />
 		</visual>
@@ -211,7 +211,7 @@
 	</joint>
 
 	<!-- kinect -->
-	<xacro:include filename="$(find robik)/model/v3/kinect.urdf.xacro"/>
+	<xacro:include filename="$(find robik_description)/urdf/kinect.urdf.xacro"/>
 	<xacro:sensor_kinect parent="base_link" />
 	<link name="base_scan_link" />
 	<joint name="base_scan_joint" type="fixed">

@@ -9,7 +9,7 @@
   <xacro:property name="cam_op" value="0.262" />
   <xacro:property name="cam_oy" value="0" />
 
-  <!--  <xacro:include filename="$(find robik)/model/v3/kinect_gazebo.urdf.xacro"/> -->
+  <!--  <xacro:include filename="$(find robik_description)/urdf/kinect_gazebo.urdf.xacro"/> -->
 
   <xacro:macro name="sensor_kinect" params="parent">
     <joint name="camera_rgb_joint" type="fixed">
