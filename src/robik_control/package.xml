@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>robik</name>
+  <name>robik_control</name>
   <version>0.9.0</version>
-  <description>Driver for Robik the Robot</description>
+  <description>Driver for Robik the Robot. This package runs on physical robot</description>
   <maintainer email="slesinger@gmail.com">honza</maintainer>
   <license>MIT</license>
   <url type="website">https://robot.slesinger.info</url>

@@ -17,19 +17,10 @@
 	<xacro:property name="wheel_distance" value="0.30" />
 	<xacro:property name="backbone_length" value="0.485" />
 
-	<!-- materials -->
-	<material name="clear_plastic">
-		<color rgba="0.81 0.81 0.81 0.5" />
-	</material>
-	<material name="alum">
-		<color rgba="0.81 0.88 0.91 1" />
-	</material>
-	<material name="wood">
-		<color rgba="1 0.81 0.4 1" />
-	</material>
-	<material name="jetson">
-		<texture filename="package://robik_description/materials/jetson.jpg" />
-	</material>
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find robik_description)/urdf/robik.gazebo" />
+  <xacro:include filename="$(find robik_description)/urdf/materials.xacro" />
+  <xacro:include filename="$(find robik_description)/urdf/macros.xacro" />
 
 	<!-- base -->
 	<link name="base_link">
@@ -159,38 +150,18 @@
 		<xacro:antenna_templ y="0.12" roll="-0.1745" name_tmpl="left_backbone"/>
 		<xacro:antenna_templ y="-0.12" roll="0.1745" name_tmpl="right_backbone"/>
 
+		<inertial>
+			<origin xyz="0 0 0.1" rpy="0 0 0"/>
+			<mass value="5.3"/>
+			<inertia
+				ixx="1" ixy="0.0" ixz="0.0"
+				iyy="1" iyz="0.0"
+				izz="1"/>
+		</inertial>
 	</link>
 
-<!--
-	<link name="base_footprint" />
-	<link name="base_stabilized" />
-
-	<joint name="base_footprint_joint" type="fixed">
-		<origin xyz="0 0 0" rpy="0 0 0" />
-		<parent link="base_footprint"/>
-		<child link="base_stabilized"/>
-	</joint>
-
-	<joint name="base_stabilized_joint" type="fixed">
-		<origin xyz="0 0 0" rpy="0 0 0" />
-		<parent link="base_stabilized"/>
-		<child link="base_link"/>
-	</joint>
--->
 
 	<!-- wheels -->
-	<xacro:macro name="wheel_templ">
-		<visual>
-			<origin xyz="0 0 0" rpy="0 ${pi_half} ${pi_half}" />
-			<geometry>
-				<cylinder radius="${wheel_radius}" length="0.04" />
-			</geometry>
-			<material name="black_wheel">
-				<color rgba="0.1 0.1 0.1 1" />
-			</material>
-		</visual>
-	</xacro:macro>
-
 	<link name="left_wheel">
 		<xacro:wheel_templ/>
 	</link>
@@ -202,12 +173,14 @@
 		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
 		<parent link="base_link"/>
 		<child link="left_wheel"/>
+		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
 
 	<joint name="wheel_right_joint" type="continuous">
 		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
 		<parent link="base_link"/>
 		<child link="right_wheel"/>
+		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
 
 	<!-- kinect -->
@@ -222,6 +195,17 @@
 
 
 	<!-- arm -->
+	<xacro:macro name="arm_inertia_templ">
+		<inertial>
+			<origin xyz="0 0 0.1" rpy="0 0 0"/>
+			<mass value="0.15"/>
+			<inertia
+				ixx="1" ixy="0.0" ixz="0.0"
+				iyy="1" iyz="0.0"
+				izz="1"/>
+		</inertial>
+	</xacro:macro>
+
 	<link name="yaw_link">
 		<visual>
 			<origin xyz="0 0 ${0.06 / 2}" rpy="0 0 0" />
@@ -230,6 +214,7 @@
 			</geometry>
 			<material name="wood" />
 		</visual>
+		<xacro:arm_inertia_templ/>
 	</link>
 
 	<joint name="yaw_joint" type="revolute">
@@ -238,6 +223,7 @@
 		<origin xyz="0.075 -0.08 ${base_above_gnd + plastic_thickness/2}" rpy="0 0 0" />
 		<axis xyz="0 0 -1" />
 		<limit lower="-1.8675023" upper="1.099557429" effort="1000" velocity="1" />
+		<dynamics damping="0.7"/>
 	</joint>
 
 
@@ -251,6 +237,7 @@
 				<color rgba="0 1.0 1.0 1.0" />
 			</material>
 		</visual>
+		<xacro:arm_inertia_templ/>
 	</link>
 
 	<joint name="shoulder_joint" type="revolute">
@@ -259,6 +246,7 @@
 		<origin xyz="0.0 0 0.06" rpy="0 0 -1.570796327" />
 		<axis xyz="1 0 0" />
 		<limit lower="0" upper="2.094395102" effort="1000" velocity="1" />
+		<dynamics damping="0.7"/>
 	</joint>
 
 
@@ -272,6 +260,7 @@
 				<color rgba="0 1.0 1.0 1.0" />
 			</material>
 		</visual>
+		<xacro:arm_inertia_templ/>
 	</link>
 
 	<joint name="elbow_joint" type="revolute">
@@ -280,6 +269,7 @@
 		<origin xyz="0 0.135 0" rpy="0 0 0" />
 		<axis xyz="1 0 0" />
 		<limit lower="-1.919862177" upper="0.6981317008" effort="1000" velocity="1" />
+		<dynamics damping="0.7"/>
 	</joint>
 
 
@@ -292,6 +282,7 @@
 				<color rgba="0 1.0 1.0 1.0" />
 			</material>
 		</visual>
+		<xacro:arm_inertia_templ/>
 	</link>
 
 	<joint name="roll_joint" type="revolute">
@@ -300,6 +291,7 @@
 		<origin xyz="0 0.065 0" rpy="0 0 0" />
 		<axis xyz="0 1 0" />
 		<limit lower="-1.570796327" upper="1.570796327" effort="1000" velocity="1" />
+		<dynamics damping="0.7"/>
 	</joint>
 
 
@@ -313,6 +305,7 @@
 				<color rgba="0 1.0 1.0 1.0" />
 			</material>
 		</visual>
+		<xacro:arm_inertia_templ/>
 	</link>
 
 	<joint name="clamp_joint" type="revolute">
@@ -322,6 +315,7 @@
 		<axis xyz="-1 0 0" />
 		<limit lower="0" upper="0.6981317008" effort="1000" velocity="1" />
 		<!--<mimic joint="clamp_joint" multiplier="-1" offset="0"/>-->
+		<dynamics damping="0.7"/>
 	</joint>
 
 </robot>

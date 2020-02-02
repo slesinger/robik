@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<robot>
+
+	<material name="clear_plastic">
+		<color rgba="0.81 0.81 0.81 0.5" />
+	</material>
+  
+	<material name="alum">
+		<color rgba="0.81 0.88 0.91 1" />
+	</material>
+
+	<material name="wood">
+		<color rgba="1 0.81 0.4 1" />
+	</material>
+
+	<material name="jetson">
+		<texture filename="package://robik_description/materials/jetson.jpg" />
+	</material>
+
+
+  <material name="black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+
+  <material name="blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+
+  <material name="green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+
+  <material name="grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+
+  <material name="orange">
+    <color rgba="${255/255} ${108/255} ${10/255} 1.0"/>
+  </material>
+
+  <material name="brown">
+    <color rgba="${222/255} ${207/255} ${195/255} 1.0"/>
+  </material>
+
+  <material name="red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+
+</robot>

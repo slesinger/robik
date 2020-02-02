@@ -5,7 +5,28 @@
 <!-- =================================================================================== -->
 <!-- (x/red +dopredu -dozadu) (y/green -levo +vpravo) (z/blue -dolu +nahoru) -->
 <robot name="robik">
-  <!-- materials -->
+  <gazebo>
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <robotNamespace>/robik</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+    <plugin filename="libdiffdrive_plugin.so" name="differential_drive_controller">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50</updateRate>
+      <leftJoint>wheel_left_joint</leftJoint>
+      <rightJoint>wheel_right_joint</rightJoint>
+      <wheelSeparation>0.30</wheelSeparation>
+      <wheelDiameter>0.10</wheelDiameter>
+      <torque>20</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
+    </plugin>
+  </gazebo>
+  <gazebo reference="base_link">
+    <material>Gazebo/Orange</material>
+  </gazebo>
   <material name="clear_plastic">
     <color rgba="0.81 0.81 0.81 0.5"/>
   </material>
@@ -17,6 +38,30 @@
   </material>
   <material name="jetson">
     <texture filename="package://robik_description/materials/jetson.jpg"/>
+  </material>
+  <material name="black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+  <material name="green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="grey">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="orange">
+    <color rgba="1.0 0.423529411765 0.0392156862745 1.0"/>
+  </material>
+  <material name="brown">
+    <color rgba="0.870588235294 0.811764705882 0.764705882353 1.0"/>
+  </material>
+  <material name="red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+  <material name="white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
   </material>
   <!-- base -->
   <link name="base_link">
@@ -156,23 +201,12 @@
         <box size="0.01 0.01 0.13"/>
       </geometry>
     </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="5.3"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
-  <!--
-	<link name="base_footprint" />
-	<link name="base_stabilized" />
-
-	<joint name="base_footprint_joint" type="fixed">
-		<origin xyz="0 0 0" rpy="0 0 0" />
-		<parent link="base_footprint"/>
-		<child link="base_stabilized"/>
-	</joint>
-
-	<joint name="base_stabilized_joint" type="fixed">
-		<origin xyz="0 0 0" rpy="0 0 0" />
-		<parent link="base_stabilized"/>
-		<child link="base_link"/>
-	</joint>
--->
   <link name="left_wheel">
     <visual>
       <origin rpy="0 1.57079632679 1.57079632679" xyz="0 0 0"/>
@@ -183,6 +217,11 @@
         <color rgba="0.1 0.1 0.1 1"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.3"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <link name="right_wheel">
     <visual>
@@ -194,16 +233,23 @@
         <color rgba="0.1 0.1 0.1 1"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.3"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="wheel_left_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0.15 0.05"/>
     <parent link="base_link"/>
     <child link="left_wheel"/>
+    <dynamics damping="0.7"/>
   </joint>
   <joint name="wheel_right_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 -0.15 0.05"/>
     <parent link="base_link"/>
     <child link="right_wheel"/>
+    <dynamics damping="0.7"/>
   </joint>
   <!--  <xacro:include filename="$(find robik_description)/urdf/kinect_gazebo.urdf.xacro"/> -->
   <joint name="camera_rgb_joint" type="fixed">
@@ -239,7 +285,7 @@
     <visual>
       <origin rpy="0 0 1.57079632679" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://robik/model/v3/meshes/kinect.dae"/>
+        <mesh filename="package://robik_description/meshes/kinect.dae"/>
       </geometry>
     </visual>
     <collision>
@@ -289,7 +335,6 @@
     <child link="base_scan_link"/>
     <origin rpy="0 0 0" xyz="-0.15 0 0.15"/>
   </joint>
-  <!-- arm -->
   <link name="yaw_link">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0.03"/>
@@ -298,6 +343,11 @@
       </geometry>
       <material name="wood"/>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.15"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="yaw_joint" type="revolute">
     <parent link="base_link"/>
@@ -305,6 +355,7 @@
     <origin rpy="0 0 0" xyz="0.075 -0.08 0.068"/>
     <axis xyz="0 0 -1"/>
     <limit effort="1000" lower="-1.8675023" upper="1.099557429" velocity="1"/>
+    <dynamics damping="0.7"/>
   </joint>
   <link name="shoulder_link">
     <visual>
@@ -316,6 +367,11 @@
         <color rgba="0 1.0 1.0 1.0"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.15"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="shoulder_joint" type="revolute">
     <parent link="yaw_link"/>
@@ -323,6 +379,7 @@
     <origin rpy="0 0 -1.570796327" xyz="0.0 0 0.06"/>
     <axis xyz="1 0 0"/>
     <limit effort="1000" lower="0" upper="2.094395102" velocity="1"/>
+    <dynamics damping="0.7"/>
   </joint>
   <link name="elbow_link">
     <visual>
@@ -334,6 +391,11 @@
         <color rgba="0 1.0 1.0 1.0"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.15"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="elbow_joint" type="revolute">
     <parent link="shoulder_link"/>
@@ -341,6 +403,7 @@
     <origin rpy="0 0 0" xyz="0 0.135 0"/>
     <axis xyz="1 0 0"/>
     <limit effort="1000" lower="-1.919862177" upper="0.6981317008" velocity="1"/>
+    <dynamics damping="0.7"/>
   </joint>
   <link name="roll_link">
     <visual>
@@ -351,6 +414,11 @@
         <color rgba="0 1.0 1.0 1.0"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.15"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="roll_joint" type="revolute">
     <parent link="elbow_link"/>
@@ -358,6 +426,7 @@
     <origin rpy="0 0 0" xyz="0 0.065 0"/>
     <axis xyz="0 1 0"/>
     <limit effort="1000" lower="-1.570796327" upper="1.570796327" velocity="1"/>
+    <dynamics damping="0.7"/>
   </joint>
   <link name="clamp_link">
     <visual>
@@ -369,6 +438,11 @@
         <color rgba="0 1.0 1.0 1.0"/>
       </material>
     </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.1"/>
+      <mass value="0.15"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
   </link>
   <joint name="clamp_joint" type="revolute">
     <parent link="roll_link"/>
@@ -377,5 +451,6 @@
     <axis xyz="-1 0 0"/>
     <limit effort="1000" lower="0" upper="0.6981317008" velocity="1"/>
     <!--<mimic joint="clamp_joint" multiplier="-1" offset="0"/>-->
+    <dynamics damping="0.7"/>
   </joint>
 </robot>

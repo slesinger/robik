@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: robik
+    relative_path: model/v3/robik.urdf
+  SRDF:
+    relative_path: config/robik.srdf
+  CONFIG:
+    generated_timestamp: 1450551459

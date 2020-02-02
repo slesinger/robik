@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:property name="update_rate" value="50" />
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libdiffdrive_plugin.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>${update_rate}</updateRate>
+            <leftJoint>wheel_left_joint</leftJoint>
+            <rightJoint>wheel_right_joint</rightJoint>
+            <wheelSeparation>0.30</wheelSeparation>
+            <wheelDiameter>0.10</wheelDiameter>
+            <torque>20</torque>
+            <commandTopic>cmd_vel</commandTopic>
+            <odometryTopic>odom</odometryTopic>
+            <odometryFrame>odom</odometryFrame>
+            <robotBaseFrame>base_link</robotBaseFrame>
+        </plugin>
+    </gazebo>
+
+    <gazebo reference="base_link">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+
+</robot>

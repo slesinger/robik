@@ -11,7 +11,7 @@ Robik AI.
 """
 
 import roslib; roslib.load_manifest('sound_play')
-import roslib; roslib.load_manifest('robik')
+import roslib; roslib.load_manifest('robik_basestation')
 import robik
 import robik.msg
 import rospy, os, sys

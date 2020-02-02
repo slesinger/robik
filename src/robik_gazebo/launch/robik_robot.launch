@@ -1,0 +1,41 @@
+<!-- Robik launch file to start up robot -->
+
+<launch>
+
+	<arg name="ros_workspace" value="/home/honza/workspace" />
+	<arg name="debug" default="false" />
+	<arg name="rgbd" default="false" />
+	<arg name="moveit" default="false" />
+	<arg name="db" default="false" />
+	<param name="robot_description" command="$(find xacro)/xacro $(find robik_description)/urdf/robik.urdf.xacro" />
+
+	<!--node name="wiimote" pkg="wiimote" type="wiimote_node.py" respawn="false" /-->
+
+	<!-- Start joint trajectory action controller -->
+	<rosparam command="load" file="$(find robik_control)/config/joint_trajectory_controllers.yaml" />
+	<rosparam command="load" file="$(find robik_control)/config/joint_state_controller.yaml" />
+	<rosparam command="load" file="$(find robik_control)/config/mobile_base_controller.yaml" />
+	<!--<rosparam command="load" file="$(find robik_control)/launch/robik_sensors_config/imu_sensor_controller.yaml" /-->
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="arm_controller gripper_controller joint_state_controller mobile_base_controller imu_sensor_controller" />
+
+	<param name="use_gui" value="true" />
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"  output="screen" />
+
+	<!-- Run the main MoveIt executable -->
+	<group if="$(arg moveit)">
+		<include file="$(find robik_moveit_config)/launch/move_group.launch">
+			<arg name="allow_trajectory_execution" value="true"/>
+			<arg name="fake_execution" value="false"/>
+			<arg name="info" value="$(arg debug)"/>
+			<arg name="debug" value="$(arg debug)"/>
+		</include>
+
+		<include file="$(find robik_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)"/>
+	</group>
+
+	<node name="sound_play" pkg="sound_play" type="soundplay_node.py" respawn="true" />
+
+	<!--node name="robik_ai" pkg="robik_basestation" type="robik_ai.py" /-->
+
+</launch>

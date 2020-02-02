@@ -50,7 +50,7 @@
           <visual>
             <origin xyz="0 0 0" rpy="0 0 ${pi/2}"/>
             <geometry>
-              <mesh filename="package://robik/model/v3/meshes/kinect.dae"/>
+              <mesh filename="package://robik_description/meshes/kinect.dae"/>
             </geometry>
           </visual>
           <collision>

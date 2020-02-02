@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>robik_gazebo</name>
+  <name>robik_basestation</name>
   <version>0.9.0</version>
   <description>
-    Robik simulation package. This launches Gazebo simulation, including all fakes. Runs on local machine.
+    Robik software that is installed on powerfull workstation having fast P2P networking
   </description>
   <license>MIT</license>
   <author email="slesinger@gmail.com">Honza Slesinger</author>
@@ -19,10 +19,4 @@
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>tf</depend>
-  <depend>gazebo_ros</depend>
-  <exec_depend>gazebo</exec_depend>
-  <export>
-    <gazebo_ros gazebo_media_path="${prefix}"/>
-    <gazebo_ros gazebo_model_path="${prefix}/models"/>
-  </export>
 </package>
