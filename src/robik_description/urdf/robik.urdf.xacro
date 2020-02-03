@@ -23,6 +23,7 @@
   <xacro:include filename="$(find robik_description)/urdf/macros.xacro" />
 
 	<!-- base -->
+	<link name="dummy" />
 	<link name="base_link">
 		<visual name="base">
 			<origin xyz="0 0 ${base_above_gnd}" rpy="0 0 0" />
@@ -159,6 +160,10 @@
 				izz="1"/>
 		</inertial>
 	</link>
+    <joint name="dummy_joint" type="fixed">
+     <parent link="dummy"/>
+     <child link="base_link"/>
+   </joint>
 
 
 	<!-- wheels -->
@@ -170,18 +175,41 @@
 	</link>
 
 	<joint name="wheel_left_joint" type="continuous">
-		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
+		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="1 0 0" />
 		<parent link="base_link"/>
 		<child link="left_wheel"/>
 		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
 
 	<joint name="wheel_right_joint" type="continuous">
-		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
+		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="1 0 0" />
 		<parent link="base_link"/>
 		<child link="right_wheel"/>
 		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
+
+	<transmission name="tran_wheel_left_joint">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="wheel_left_joint">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="motor_wheel_left_joint">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<transmission name="tran_wheel_right_joint">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="wheel_right_joint">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="motor_wheel_right_joint">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
 
 	<!-- kinect -->
 	<xacro:include filename="$(find robik_description)/urdf/kinect.urdf.xacro"/>
@@ -195,17 +223,6 @@
 
 
 	<!-- arm -->
-	<xacro:macro name="arm_inertia_templ">
-		<inertial>
-			<origin xyz="0 0 0.1" rpy="0 0 0"/>
-			<mass value="0.15"/>
-			<inertia
-				ixx="1" ixy="0.0" ixz="0.0"
-				iyy="1" iyz="0.0"
-				izz="1"/>
-		</inertial>
-	</xacro:macro>
-
 	<link name="yaw_link">
 		<visual>
 			<origin xyz="0 0 ${0.06 / 2}" rpy="0 0 0" />
@@ -214,6 +231,12 @@
 			</geometry>
 			<material name="wood" />
 		</visual>
+		<collision>
+			<origin xyz="0 0 ${0.06 / 2}" rpy="0 0 0" />
+			<geometry>
+				<box size="0.045 0.04 0.06" />
+			</geometry>
+		</collision>
 		<xacro:arm_inertia_templ/>
 	</link>
 

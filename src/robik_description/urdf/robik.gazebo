@@ -3,6 +3,12 @@
 
     <xacro:property name="update_rate" value="50" />
     <gazebo>
+        <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+            <!--robotNamespace>/robik</robotNamespace-->
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+    <gazebo>
         <plugin name="differential_drive_controller" filename="libdiffdrive_plugin.so">
             <alwaysOn>true</alwaysOn>
             <updateRate>${update_rate}</updateRate>
