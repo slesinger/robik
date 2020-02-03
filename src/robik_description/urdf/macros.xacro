@@ -6,9 +6,7 @@
 			<geometry>
 				<cylinder radius="${wheel_radius}" length="0.04" />
 			</geometry>
-			<material name="black_wheel">
-				<color rgba="0.1 0.1 0.1 1" />
-			</material>
+			<material name="jetson" />
 		</visual>
 		<collision>
 			<origin xyz="0 0 0" rpy="0 ${pi_half} ${pi_half}" />

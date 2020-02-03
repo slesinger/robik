@@ -152,7 +152,7 @@
 		<xacro:antenna_templ y="-0.12" roll="0.1745" name_tmpl="right_backbone"/>
 
 		<inertial>
-			<origin xyz="0 0 0.1" rpy="0 0 0"/>
+			<origin xyz="-0.1 0 0.1" rpy="0 0 0"/>
 			<mass value="5.3"/>
 			<inertia
 				ixx="1" ixy="0.0" ixz="0.0"
@@ -175,16 +175,18 @@
 	</link>
 
 	<joint name="wheel_left_joint" type="continuous">
-		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="1 0 0" />
-		<parent link="base_link"/>
-		<child link="left_wheel"/>
+		<origin xyz="0 ${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="left_wheel" />
+		<axis xyz="0 0 1" />
 		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
 
 	<joint name="wheel_right_joint" type="continuous">
-		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="1 0 0" />
+		<origin xyz="0 -${wheel_distance / 2} ${wheel_radius}" rpy="0 0 0" />
 		<parent link="base_link"/>
 		<child link="right_wheel"/>
+		<axis xyz="0 0 1" />
 		<joint_properties damping="1.0" friction="1.0"/>
 	</joint>
 
@@ -260,6 +262,12 @@
 				<color rgba="0 1.0 1.0 1.0" />
 			</material>
 		</visual>
+		<collision>
+			<origin xyz="0 0.0675 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.04 0.135 0.02" />
+			</geometry>
+		</collision>
 		<xacro:arm_inertia_templ/>
 	</link>
 
@@ -279,10 +287,14 @@
 			<geometry>
 				<box size="0.04 0.065 0.02" />
 			</geometry>
-			<material name="wood">
-				<color rgba="0 1.0 1.0 1.0" />
-			</material>
+			<material name="wood" />
 		</visual>
+		<collision>
+			<origin xyz="0 0.0325 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.04 0.065 0.02" />
+			</geometry>
+		</collision>
 		<xacro:arm_inertia_templ/>
 	</link>
 
@@ -301,10 +313,13 @@
 			<geometry>
 				<box size="0.03 0.003 0.04" />
 			</geometry>
-			<material name="wood">
-				<color rgba="0 1.0 1.0 1.0" />
-			</material>
+			<material name="wood" />
 		</visual>
+		<collision>
+			<geometry>
+				<box size="0.03 0.003 0.04" />
+			</geometry>
+		</collision>
 		<xacro:arm_inertia_templ/>
 	</link>
 
@@ -324,10 +339,14 @@
 			<geometry>
 				<box size="0.02 0.09 0.01" />
 			</geometry>
-			<material name="alum">
-				<color rgba="0 1.0 1.0 1.0" />
-			</material>
+			<material name="alum" />
 		</visual>
+		<collision>
+			<origin xyz="0 0.057 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.02 0.09 0.01" />
+			</geometry>
+		</collision>
 		<xacro:arm_inertia_templ/>
 	</link>
 
