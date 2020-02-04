@@ -13,6 +13,7 @@
 *.dylib
 *.dll
 
+.tc.permissions.facl
 # Fortran module files
 *.mod
 
@@ -52,6 +53,7 @@ assets/
 gen/
 build.xml
 lint.xml
+readme.txt
 local.properties
 proguard-project.txt
 build-*/
